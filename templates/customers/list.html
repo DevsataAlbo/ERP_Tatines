@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Clientes - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold">Clientes</h1>
+        <a href="{% url 'customers:create' %}" 
+           class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+            Nuevo Cliente
+        </a>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div class="flex gap-4">
+            <input type="text" 
+                   id="search-input"
+                   placeholder="Buscar por RUT, nombre o empresa..." 
+                   class="flex-1 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+        </div>
+    </div>
+
+    <!-- Tabla de Clientes -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RUT</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre/Empresa</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="customers-table-body" class="bg-white divide-y divide-gray-200">
+                {% for customer in customers %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {{ customer.rut }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ customer.get_full_name }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ customer.get_customer_type_display }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ customer.email|default:"-" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ customer.phone|default:"-" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <a href="{% url 'customers:detail' customer.pk %}" 
+                           class="text-blue-600 hover:text-blue-900">
+                            Ver detalle
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                        No hay clientes registrados
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/customers/list.js' %}"></script>
+{% endblock %}
+
+
+
+
+
+
+
+
+<!-- Paginación -->
+{% if is_paginated %}
+<div class="mt-4 flex justify-center">
+    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+           class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            Anterior
+        </a>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+        <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+           class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium 
+                  {% if page_obj.number == num %}text-blue-600 bg-blue-50{% else %}text-gray-700 hover:bg-gray-50{% endif %}">
+            {{ num }}
+        </a>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+           class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            Siguiente
+        </a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}

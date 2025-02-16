@@ -1,0 +1,42 @@
+<!-- Modal de Merma -->
+<div id="mermaModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Registrar Merma</h3>
+            <form id="mermaForm" method="post" data-url="{% url 'products:register_merma' product.pk %}">
+                {% csrf_token %}
+                
+                <div class="space-y-4">
+                    <!-- Cantidad -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ merma_form.quantity.label }}</label>
+                        {{ merma_form.quantity }}
+                    </div>
+
+                    <!-- Motivo -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ merma_form.reason.label }}</label>
+                        {{ merma_form.reason }}
+                    </div>
+
+                    <!-- Notas -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ merma_form.notes.label }}</label>
+                        {{ merma_form.notes }}
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" id="closeMermaModal"
+                            class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                        Registrar Merma
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

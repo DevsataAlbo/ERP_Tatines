@@ -1,0 +1,86 @@
+<aside class="fixed left-0 top-0 w-64 h-full bg-gray-800 text-white">
+    <div class="p-4">
+        <h2 class="text-2xl font-bold">Ventas</h2>
+    </div>
+    
+    <nav class="mt-4">
+        <a href="{% url 'dashboard:index' %}" class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'dashboard' %}bg-gray-700{% endif %}">
+            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+        </a>
+
+        <!-- Nueva opción para Reportes Financieros -->
+        {% if request.user.role == 'admin' %}
+            <a href="{% url 'financial_reports:dashboard' %}" 
+            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'financial_reports' %}bg-gray-700{% endif %}">
+                <i class="fas fa-chart-line mr-2"></i> Reportes Financieros
+            </a>
+        {% endif %}
+
+        {% if request.user.role == 'admin' %}
+            <a href="{% url 'products:stock_entry_list' %}" 
+            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.url_name == 'stock_entry_list' %}bg-gray-700{% endif %}">
+                <i class="fas fa-boxes mr-2"></i>
+                Ingresos de Stock
+            </a>
+        {% endif %}
+
+        {% if request.user.role == 'admin' %}
+            <a href="{% url 'inventory_management:list' %}" 
+            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'inventory_management' %}bg-gray-700{% endif %}">
+                <i class="fas fa-boxes-stacked mr-2"></i>
+                Inventario
+            </a>
+        {% endif %}
+        
+        <!-- {% if request.user.role == 'admin' %}  
+        {% endif %} -->
+        <a href="{% url 'products:list' %}" class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'products' %}bg-gray-700{% endif %}">
+            <i class="fas fa-box mr-2"></i> Productos
+        </a>
+
+        {% if request.user.role == 'admin' %}
+            <a href="{% url 'suppliers:list' %}" 
+            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'suppliers' %}bg-gray-700{% endif %}">
+                <i class="fas fa-truck mr-2"></i> Proveedores
+            </a>
+        {% endif %}
+
+        {% if request.user.role == 'admin' or request.user.role == 'seller' %}
+            <a href="{% url 'customers:list' %}" 
+            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'customers' %}bg-gray-700{% endif %}">
+                <i class="fas fa-users mr-2"></i> Clientes
+            </a>
+        {% endif %}
+        
+        {% if request.user.role == 'admin' or request.user.role == 'seller' %}
+            <a href="{% url 'sales:list' %}" class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'sales' %}bg-gray-700{% endif %}">
+                <i class="fas fa-shopping-cart mr-2"></i> Ventas
+            </a>
+        {% endif %}
+
+        {% if request.user.role == 'admin' %}
+            <a href="{% url 'expenses:list' %}" 
+            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'expenses' %}bg-gray-700{% endif %}">
+                <i class="fas fa-file-invoice-dollar mr-2"></i> Gastos
+            </a>
+        {% endif %}
+
+        {% if request.user.role == 'admin' %}
+        <a href="{% url 'payment_providers:list' %}" 
+            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'payment_providers' %}bg-gray-700{% endif %}"> <i class="fa-solid fa-basket-shopping"></i> Medios de Pago
+        </a>
+        {% endif %}
+
+        {% if request.user.role == 'admin' %}
+        <a href="{% url 'products:expiring' %}" class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.url_name == 'expiring' %}bg-gray-700{% endif %}">
+            <i class="fas fa-clock-rotate-left mr-2"></i>
+            Productos por Vencer
+        </a>
+        {% endif %}
+        
+        {% if request.user.role == 'admin' %}
+        <a href="{% url 'users:list' %}" class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'users' %}bg-gray-700{% endif %}"> <i class="fas fa-users mr-2"></i>  Usuarios
+        </a>
+        {% endif %}
+    </nav>
+</aside>

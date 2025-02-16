@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar{% else %}Nueva{% endif %} Categoría - Sistema de Ventas
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-6">
+                {% if form.instance.pk %}
+                    Editar Categoría
+                {% else %}
+                    Nueva Categoría de Gasto
+                {% endif %}
+            </h2>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <!-- Nombre -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nombre</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ form.name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Descripción -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Descripción</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ form.description.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Categoria padre -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Categoría Principal</label>
+                    {{ form.parent }}
+                    {% if form.parent.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ form.parent.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Botones -->
+                <div class="flex justify-end space-x-4 pt-6">
+                    <a href="{% url 'expenses:list' %}" 
+                       class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                        Cancelar
+                    </a>
+                    <button type="submit" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        {% if form.instance.pk %}Actualizar{% else %}Guardar{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

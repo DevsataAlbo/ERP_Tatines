@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}Dashboard Financiero - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+
+    
+
+    
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <!-- Botones filtros -->
+        <div class="text-lg pb-10 flex justify-center font-semibold">
+            Período: <span id="current-period-display">{{ period_display }}</span>
+        </div>
+        <div class="flex justify-center items-center mb-4">
+            
+            <!-- Botones de selección de período -->
+            <div class="flex space-x-4 pe-10">
+                <button type="button" data-period="1M" 
+                        class="period-selector px-4 py-2 rounded-lg {% if current_period == '1M' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                    1M
+                </button>
+                <button type="button" data-period="3M"
+                        class="period-selector px-4 py-2 rounded-lg {% if current_period == '3M' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                    3M
+                </button>
+                <button type="button" data-period="6M"
+                        class="period-selector px-4 py-2 rounded-lg {% if current_period == '6M' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                    6M
+                </button>
+                <button type="button" data-period="12M"
+                        class="period-selector px-4 py-2 rounded-lg {% if current_period == '12M' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                    12M
+                </button>
+                <button type="button" data-period="MAX"
+                        class="period-selector px-4 py-2 rounded-lg {% if current_period == 'MAX' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                    Máximo
+                </button>
+            </div>
+    
+            <!-- Filtros de Fecha y Botones -->
+            <form method="get" class="flex items-end gap-x-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Desde</label>
+                    <input type="date" name="date_from" 
+                        value="{{ request.GET.date_from|default:'' }}"
+                        class="mt-1 block w-full rounded-md border-gray-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Hasta</label>
+                    <input type="date" name="date_to" 
+                        value="{{ request.GET.date_to|default:'' }}"
+                        class="mt-1 block w-full rounded-md border-gray-300">
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="submit" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        Filtrar
+                    </button>
+                    <a href="{% url 'financial_reports:dashboard' %}" 
+                       class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                        Reiniciar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- KPIs Principales -->
+    <div class="grid grid-cols-5 gap-4 mb-6">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Ventas Totales</p>
+            <h3 class="text-2xl font-bold">$ {{ income_statement.income.total_sales|intcomma }}</h3>
+            <div class="mt-2">
+                <span class="text-sm text-gray-500">Neto: $ {{ income_statement.income.net_sales|intcomma }}</span>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Ganancias del Período</p>
+            <h3 class="text-2xl font-bold">$ {{ income_statement.profitability.gross_profit|intcomma }}</h3>
+            <div class="mt-2">
+                <span class="text-sm {% if income_statement.profitability.gross_margin >= 20 %}text-green-500{% else %}text-red-500{% endif %}">
+                    Margen: {{ income_statement.profitability.gross_margin|floatformat:1 }}%
+                </span>
+            </div>
+        </div>
+    
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Costo de Ventas</p>
+            <h3 class="text-2xl font-bold">$ {{ income_statement.costs.products_cost|intcomma }}</h3>
+            <div class="mt-2">
+                <span class="text-sm text-gray-500">Neto: $ {{ income_statement.costs.products_cost_net|intcomma }}</span>
+            </div>
+        </div>
+    
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Gastos Operacionales</p>
+            <h3 class="text-2xl font-bold">$ {{ income_statement.expenses.total|intcomma }}</h3>
+        </div>
+    
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Utilidad Operacional</p>
+            <h3 class="text-2xl font-bold">$ {{ income_statement.profitability.operating_profit|intcomma }}</h3>
+            <div class="mt-2">
+                <span class="text-sm {% if income_statement.profitability.operating_margin >= 20 %}text-green-500{% else %}text-red-500{% endif %}">
+                    Margen: {{ income_statement.profitability.operating_margin|floatformat:1 }}%
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nueva sección para desglose de IVA -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">IVA Débito</p>
+            <h3 class="text-2xl font-bold">$ {{ income_statement.tax_info.iva_debito|intcomma }}</h3>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">IVA Crédito</p>
+            <h3 class="text-2xl font-bold">$ {{ income_statement.tax_info.iva_credito|intcomma }}</h3>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">IVA a Pagar</p>
+            <h3 class="text-2xl font-bold">$ {{ income_statement.tax_info.iva_pagar|intcomma }}</h3>
+        </div>
+
+        <!-- Comisiones -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Comisiones pasarela de pago</p>
+            <h3 class="text-2xl font-bold">$ {{ income_statement.tax_info.comisiones_total|intcomma }}</h3>
+        </div>
+    </div>
+
+    <!-- Valorización de Inventario -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Valor Venta</p>
+            <h3 class="text-2xl font-bold">$ {{ inventory_valuation.sale_gross|intcomma }}</h3>
+            <div class="mt-2">
+                <span class="text-sm text-gray-500">Neto: $ {{ inventory_valuation.sale_net|intcomma }}</span>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Valor Compra</p>
+            <h3 class="text-2xl font-bold">$ {{ inventory_valuation.purchase_gross|intcomma }}</h3>
+            <div class="mt-2">
+                <span class="text-sm text-gray-500">Neto: $ {{ inventory_valuation.purchase_net|intcomma }}</span>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Ganancia Proyectada</p>
+            <h3 class="text-2xl font-bold">$ {{ inventory_valuation.ganancia_proyectada|intcomma }}</h3>
+            <div class="mt-2">
+                <span class="text-sm {% if inventory_valuation.margen_proyectado >= 20 %}text-green-500{% else %}text-red-500{% endif %}">
+                    Margen: {{ inventory_valuation.margen_proyectado }}%
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ventas por Usuario -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-lg font-semibold mb-4">Ventas por Usuario</h2>
+        <div class="space-y-4">
+            {% for user_sales in sales_by_user %}
+            <div class="flex justify-between items-center p-4 bg-gray-50 rounded">
+                <div>
+                    <p class="font-medium">{{ user_sales.user__username }}</p>
+                    <p class="text-sm text-gray-500">{{ user_sales.cantidad_ventas }} ventas</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-medium">$ {{ user_sales.total_ventas|intcomma }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="grid grid-cols-12 gap-6 mb-6">
+        <!-- Tendencia de Ventas (8 columnas) -->
+        <div class="col-span-12 lg:col-span-8 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4">Tendencia de Ventas</h2>
+            <canvas id="salesTrendChart" class="w-full h-64"></canvas>
+        </div>
+    
+        <!-- Gastos por Categoría (4 columnas) -->
+        <div class="col-span-12 lg:col-span-4 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4">Gastos por Categoría</h2>
+            <canvas id="expensePieChart" class="w-full h-64"></canvas>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ sales_trends|json_script:"sales-trends-data" }}
+{{ expense_analysis|json_script:"expense-data" }}
+<script>
+    // Datos para los gráficos
+    window.dashboardData = {
+        salesTrends: JSON.parse(document.getElementById('sales-trends-data').textContent),
+        expenseData: JSON.parse(document.getElementById('expense-data').textContent)
+    };
+</script>
+<script src="{% static 'js/financial_reports/dashboard.js' %}"></script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+

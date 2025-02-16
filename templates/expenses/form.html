@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen p-4 bg-gray-50">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-sm">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">
+                {% if form.instance.pk %}Editar{% else %}Registrar Nuevo{% endif %} Gasto
+            </h2>
+        </div>
+
+        <div class="p-6">
+            <form method="post" id="expenseForm">
+                {% csrf_token %}
+
+                <!-- Campos Principales -->
+                <div class="space-y-6">
+                    <!-- Categoría y Fecha -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Categoría
+                            </label>
+                            {{ form.category }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Fecha
+                            </label>
+                            {{ form.date }}
+                        </div>
+                    </div>
+
+                    <!-- Monto e IVA -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            Monto
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                                $
+                            </span>
+                            {{ form.amount }}
+                        </div>
+                        <div class="flex items-center mt-2 space-x-2">
+                            {{ form.is_tax_included }}
+                            <label class="text-sm text-gray-700">
+                                Incluye IVA
+                            </label>
+                        </div>
+                        <div id="ivaPreview" class="text-sm text-gray-500 mt-1"></div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Descripción
+                        </label>
+                        {{ form.description }}
+                    </div>
+                    
+                    <!-- Agregar después del campo de descripción -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Categoría Principal</label>
+                        {{ form.parent }}
+                        {% if form.parent.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.parent.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                <!-- Botones -->
+                <div class="mt-6 flex justify-end space-x-3">
+                    <a href="{% url 'expenses:list' %}" 
+                       class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        Cancelar
+                    </a>
+                    <button type="submit" 
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors">
+                        {% if form.instance.pk %}Actualizar{% else %}Guardar{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+<script src="{% static 'js/expenses/form.js' %}"></script>
+{% endblock %}

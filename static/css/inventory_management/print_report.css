@@ -1,0 +1,258 @@
+/* Estilos para pantalla */
+.report-container {
+    max-width: 64rem;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: white;
+    padding: 1.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.stat-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.section-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.data-table {
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-header {
+    background-color: #F9FAFB;
+}
+
+.table-header th {
+    padding: 0.75rem 1.5rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: #6B7280;
+}
+
+.table-body {
+    background-color: white;
+}
+
+.table-body td {
+    padding: 1rem 1.5rem;
+    white-space: nowrap;
+}
+
+/* Estilos específicos para impresión */
+@media print {
+    /* Reset general */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* Ocultar elementos innecesarios */
+    aside, header, .no-print, nav, button, .web-view {
+        display: none !important;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.4;
+        color: black;
+        background: white;
+    }
+
+    /* Contenedor principal */
+    .print-view {
+        display: block !important;
+        width: 100%;
+        padding: 20px;
+    }
+
+    /* Tablas */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        page-break-inside: auto;
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border: 1px solid #000;
+    }
+
+    th {
+        background-color: #f0f0f0 !important;
+        font-weight: bold;
+    }
+
+    /* Títulos y encabezados */
+    h1 {
+        font-size: 18pt;
+        margin-bottom: 15px;
+    }
+
+    h2 {
+        font-size: 14pt;
+        margin: 15px 0;
+    }
+
+    /* Ajustes específicos */
+    .text-red { color: #dc2626 !important; }
+    .text-green { color: #059669 !important; }
+    
+    /* Configuración de página */
+    @page {
+        margin: 2cm;
+    }
+
+    /* Evitar saltos de página indeseados */
+    .no-break {
+        page-break-inside: avoid;
+    }
+}
+
+/* Estilos específicos para impresión */
+@media print {
+    /* Reset general */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* Ocultar elementos innecesarios */
+    aside, header, .no-print, nav, button, .web-view {
+        display: none !important;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.4;
+        color: black;
+        background: white;
+        font-size: 12pt; /* Ajustar el tamaño de la fuente para impresión */
+    }
+
+    /* Contenedor principal */
+    .report-container {
+        width: 100%;
+        padding: 20px;
+    }
+
+    /* Tablas */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        page-break-inside: auto;
+        font-size: 10pt; /* Ajustar el tamaño de la fuente de las tablas */
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border: 1px solid #000;
+    }
+
+    th {
+        background-color: #f0f0f0 !important;
+        font-weight: bold;
+    }
+
+    /* Ajustar el ancho de las columnas */
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+        width: 30%; /* Ajustar el ancho de la primera columna */
+    }
+
+    .data-table th:nth-child(2),
+    .data-table td:nth-child(2),
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3),
+    .data-table th:nth-child(4),
+    .data-table td:nth-child(4) {
+        width: 15%; /* Ajustar el ancho de las columnas restantes */
+    }
+
+    /* Títulos y encabezados */
+    h1 {
+        font-size: 18pt;
+        margin-bottom: 15px;
+    }
+
+    h2 {
+        font-size: 14pt;
+        margin: 15px 0;
+    }
+
+    /* Ajustes específicos */
+    .text-red { color: #dc2626 !important; }
+    .text-green { color: #059669 !important; }
+    
+    /* Configuración de página */
+    @page {
+        margin: 1cm; /* Reducir el margen para aprovechar mejor el espacio */
+    }
+
+    /* Evitar saltos de página indeseados */
+    .no-break {
+        page-break-inside: avoid;
+    }
+
+    /* Ajustar el espaciado y el tamaño de las celdas */
+    .table-body td {
+        padding: 6px 8px; /* Reducir el padding para que las celdas no ocupen tanto espacio */
+        white-space: normal; /* Permitir que el texto se ajuste */
+    }
+
+    /* Ajustar el tamaño de los botones y otros elementos */
+    .stat-card, .section-card {
+        box-shadow: none; /* Eliminar sombras para impresión */
+        border: 1px solid #000; /* Añadir bordes para mejor legibilidad */
+    }
+}

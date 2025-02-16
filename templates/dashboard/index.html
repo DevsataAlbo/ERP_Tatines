@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Dashboard - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Resumen de Ventas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <!-- Ventas del Día -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Ventas del Día</p>
+                    <h3 class="text-2xl font-bold">$ {{ sales_summary.day.total|default:0|intcomma }}</h3>
+                    <p class="text-sm text-gray-500">{{ sales_summary.day.count|default:0 }} ventas</p>
+                </div>
+                <div class="bg-blue-100 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ventas de la Semana -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Ventas de la Semana</p>
+                    <h3 class="text-2xl font-bold">$ {{ sales_summary.week.total|default:0|intcomma }}</h3>
+                    <p class="text-sm text-gray-500">{{ sales_summary.week.count|default:0 }} ventas</p>
+                </div>
+                <div class="bg-green-100 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ventas del Mes -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Ventas del Mes</p>
+                    <h3 class="text-2xl font-bold">$ {{ sales_summary.month.total|default:0|intcomma }}</h3>
+                    <p class="text-sm text-gray-500">{{ sales_summary.month.count|default:0 }} ventas</p>
+                </div>
+                <div class="bg-purple-100 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ventas del Año -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Ventas del Año</p>
+                    <h3 class="text-2xl font-bold">$ {{ sales_summary.year.total|default:0|intcomma }}</h3>
+                    <p class="text-sm text-gray-500">{{ sales_summary.year.count|default:0 }} ventas</p>
+                </div>
+                <div class="bg-yellow-100 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicadores Financieros -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <!-- Ventas Totales -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Ventas Totales</p>
+            <h3 class="text-2xl font-bold">$ {{ financial_data.total_sales|intcomma }}</h3>
+        </div>
+        
+        <!-- Costos -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Costos</p>
+            <h3 class="text-2xl font-bold">$ {{ financial_data.costs|intcomma }}</h3>
+        </div>
+        
+        <!-- Gastos -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Gastos</p>
+            <h3 class="text-2xl font-bold">$ {{ financial_data.expenses|intcomma }}</h3>
+        </div>
+        
+        <!-- Utilidad Operacional -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 text-sm">Utilidad Operacional</p>
+            <h3 class="text-2xl font-bold">$ {{ financial_data.operating_profit|intcomma }}</h3>
+            <p class="text-sm {% if financial_data.margin >= 20 %}text-green-500{% else %}text-red-500{% endif %}">
+                Margen: {{ financial_data.margin }}%
+            </p>
+        </div>
+    </div>
+
+    <!-- Productos Más Vendidos y Gráfico -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Productos Más Vendidos -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4">Productos Más Vendidos</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Del Día -->
+                <div>
+                    <p class="text-sm text-gray-500">Hoy</p>
+                    {% if top_products.day %}
+                        <p class="font-medium">{{ top_products.day.product__name }}</p>
+                        <p class="text-sm text-gray-500">{{ top_products.day.total_quantity }} unidades</p>
+                        <p class="text-sm text-gray-500">$ {{ top_products.day.total_amount|intcomma }}</p>
+                    {% else %}
+                        <p class="text-sm text-gray-500">Sin ventas</p>
+                    {% endif %}
+                </div>
+
+                <!-- De la Semana -->
+                <div>
+                    <p class="text-sm text-gray-500">Esta Semana</p>
+                    {% if top_products.week %}
+                        <p class="font-medium">{{ top_products.week.product__name }}</p>
+                        <p class="text-sm text-gray-500">{{ top_products.week.total_quantity }} unidades</p>
+                        <p class="text-sm text-gray-500">$ {{ top_products.week.total_amount|intcomma }}</p>
+                    {% else %}
+                        <p class="text-sm text-gray-500">Sin ventas</p>
+                    {% endif %}
+                </div>
+
+                <!-- Del Mes -->
+                <div>
+                    <p class="text-sm text-gray-500">Este Mes</p>
+                    {% if top_products.month %}
+                        <p class="font-medium">{{ top_products.month.product__name }}</p>
+                        <p class="text-sm text-gray-500">{{ top_products.month.total_quantity }} unidades</p>
+                        <p class="text-sm text-gray-500">$ {{ top_products.month.total_amount|intcomma }}</p>
+                    {% else %}
+                        <p class="text-sm text-gray-500">Sin ventas</p>
+                    {% endif %}
+                </div>
+
+                <!-- Del Año -->
+                <div>
+                    <p class="text-sm text-gray-500">Este Año</p>
+                    {% if top_products.year %}
+                        <p class="font-medium">{{ top_products.year.product__name }}</p>
+                        <p class="text-sm text-gray-500">{{ top_products.year.total_quantity }} unidades</p>
+                        <p class="text-sm text-gray-500">$ {{ top_products.year.total_amount|intcomma }}</p>
+                    {% else %}
+                        <p class="text-sm text-gray-500">Sin ventas</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Ventas -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4">Ventas Diarias del Mes</h2>
+            <div class="h-64">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+    </div>
+        <!-- Agregar después del gráfico de ventas -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <!-- Productos sin Movimiento -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold mb-4">Productos sin Movimiento</h2>
+                <div class="space-y-3">
+                    {% for product in slow_moving_products %}
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <div class="font-medium">{{ product.name }}</div>
+                        <div class="grid grid-cols-2 gap-2 mt-1">
+                            <div class="text-sm text-gray-500">Stock: {{ product.stock }}</div>
+                            {% if product.has_sales %}
+                                <div class="text-sm text-gray-500 text-right">
+                                    Última venta: {{ product.last_sale_date|date:"d/m/Y" }}
+                                </div>
+                            {% else %}
+                                <div class="text-sm text-red-500 text-right">
+                                    Sin ventas registradas
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if product.has_bulk_sales %}
+                        <div class="text-sm text-gray-500">
+                            Stock a granel: {{ product.bulk_stock }} kg
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-500 text-sm">No hay productos sin movimiento</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Rentabilidad -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold mb-4">Top 10 - Rentabilidad</h2>
+                <!-- Más Rentables -->
+                <div class="mb-4">
+                    <h3 class="text-md font-medium text-green-600 mb-2">Más Rentables</h3>
+                    <div class="space-y-2">
+                        {% for product in most_profitable_products %}
+                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <span class="text-sm">{{ product.name }}</span>
+                            <span class="text-sm font-medium text-green-600">{{ product.profit_margin|floatformat:1 }}%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Menos Rentables -->
+                <div>
+                    <h3 class="text-md font-medium text-red-600 mb-2">Menos Rentables</h3>
+                    <div class="space-y-2">
+                        {% for product in least_profitable_products %}
+                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <span class="text-sm">{{ product.name }}</span>
+                            <span class="text-sm font-medium text-red-600">{{ product.profit_margin|floatformat:1 }}%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock Crítico -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold mb-4">Stock Crítico</h2>
+                <div class="space-y-3">
+                    {% for product in critical_stock_products %}
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <div class="font-medium">{{ product.name }}</div>
+                        <div class="text-sm text-red-500 font-medium">Stock: {{ product.stock }} unidades</div>
+                        <div class="text-sm text-gray-500">Precio: $ {{ product.sale_price|intcomma }}</div>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-500 text-sm">No hay productos con stock crítico</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ sales_chart_data|json_script:"sales-chart-data" }}
+<script>
+    const chartData = JSON.parse(document.getElementById('sales-chart-data').textContent);
+    window.salesChartData = {
+        labels: chartData.labels,
+        data: chartData.data
+    };
+</script>
+<script src="{% static 'js/dashboard/dashboard.js' %}"></script>
+{% endblock %}

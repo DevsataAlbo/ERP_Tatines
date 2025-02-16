@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Producto - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-md mx-auto">
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-6 text-center">Confirmar Eliminación</h2>
+            
+            <div class="text-center mb-6">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" 
+                         alt="{{ product.name }}" 
+                         class="h-32 w-32 mx-auto rounded-lg object-cover mb-4">
+                {% else %}
+                    <div class="h-32 w-32 mx-auto rounded-lg bg-gray-200 flex items-center justify-center mb-4">
+                        <i class="fas fa-box text-gray-500 text-4xl"></i>
+                    </div>
+                {% endif %}
+                
+                <p class="text-gray-600">
+                    ¿Estás seguro de que deseas eliminar el producto <br>
+                    <strong class="text-gray-800">{{ object.name }}</strong>?
+                </p>
+                
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>Código: {{ object.code }}</p>
+                    <p>Categoría: {{ object.category.name }}</p>
+                    <p>Stock actual: {{ object.stock }}</p>
+                </div>
+            </div>
+
+            <form method="post" class="flex justify-center space-x-4">
+                {% csrf_token %}
+                <a href="{% url 'products:list' %}" 
+                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                    Confirmar Eliminación
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

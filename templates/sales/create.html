@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Nueva Venta - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Panel de Búsqueda y Carrito (2/3 del ancho) -->
+        <div class="lg:col-span-2">
+            <!-- Búsqueda de Productos -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-lg font-medium mb-4">Buscar Productos</h2>
+                <div class="flex gap-4">
+                    <input type="text" 
+                           id="searchProduct" 
+                           class="flex-1 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="Buscar por nombre o marca...">
+                </div>
+
+                <!-- Resultados de búsqueda -->
+                <div id="searchResults" class="mt-4 bg-white rounded-lg shadow overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultsBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Resultados de búsqueda aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Carrito -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-lg font-medium mb-4">Productos en el Carrito</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio Unit.</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartItems">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para productos a granel -->
+        <div id="amountModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3 text-center">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modalProductName"></h3>
+                    <div class="mt-2 px-7 py-3">
+                        <input type="number" 
+                            id="amountInput" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Ingrese monto en pesos">
+                    </div>
+                    <div class="flex justify-end gap-2 px-4 py-3">
+                        <button id="cancelAmount" 
+                                class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                            Cancelar
+                        </button>
+                        <button id="confirmAmount"
+                                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Resumen y Finalización (1/3 del ancho) -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <form id="saleForm" method="POST" action="{% url 'sales:create' %}" class="space-y-4 mb-6">
+                    {% csrf_token %}
+                    
+                    <h2 class="text-lg font-medium mb-4">Resumen de Venta</h2>
+                    
+                    <!-- Totales -->
+                    <div class="space-y-4 mb-6">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Subtotal:</span>
+                            <span class="font-medium">$ <span id="subtotal">0</span></span>
+                        </div>
+                
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">IVA (19%):</span>
+                            <span class="font-medium">$ <span id="tax">0</span></span>
+                        </div>
+                
+                        <div class="flex justify-between items-center text-lg font-bold">
+                            <span>Total:</span>
+                            <span>$ <span id="total">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Seleccionar fecha de venta -->
+                    <div class="mb-6">
+                        <label for="sale-date" class="block text-sm font-medium text-gray-600 mb-2">
+                            Fecha y hora de la venta
+                        </label>
+                        <input 
+                            type="datetime-local" 
+                            id="sale-date" 
+                            name="date"
+                            value="{{ sale.date|date:'Y-m-d\TH:i' }}" 
+                            class="form-control mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            required
+                        >
+                    </div>
+
+                    <!-- Selector de Cliente -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Cliente (Opcional)
+                        </label>
+                        <div class="flex gap-2">
+                            <select id="customer-select" 
+                                    name="customer" 
+                                    class="flex-1 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">Seleccionar cliente</option>
+                            </select>
+                            <a href="{% url 'customers:create' %}" 
+                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                            target="_blank">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+            
+                    <!-- Método de Pago -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+                        <select 
+                            id="payment-method" 
+                            name="payment_method"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required
+                        >
+                            <option value="">Seleccione método de pago</option>
+                            {% for value, label in payment_methods %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Selector de proveedor -->
+                    <!-- <div id="payment_provider_section" class="mb-6 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Proveedor de Pago</label>
+                        <select name="payment_provider" class="w-full rounded-lg border-gray-300">
+                            <option value="">Seleccione proveedor</option>
+                            {% for provider in payment_providers %}
+                            <option value="{{ provider.id }}" 
+                                    data-debit-rate="{{ provider.debit_commission_rate|stringformat:'.2f' }}"
+                                    data-credit-rate="{{ provider.credit_commission_rate|stringformat:'.2f' }}">
+                                {{ provider.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div> -->
+
+                    <!-- Selector de Proveedor -->
+                    <div id="payment_provider_section" class="mb-6 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Proveedor de Pago</label>
+                        <select name="payment_provider" class="w-full rounded-lg border-gray-300">
+                            <option value="">Seleccione proveedor</option>
+                            {% for provider in payment_providers %}
+                            <option value="{{ provider.id }}" 
+                                    data-debit-rate="{{ provider.debit_commission_rate|stringformat:'.2f' }}"
+                                    data-credit-rate="{{ provider.credit_commission_rate|stringformat:'.2f' }}"
+                                    data-is-default="{{ provider.is_default|lower }}"
+                                    {% if provider.is_default %}selected{% endif %}>
+                                {{ provider.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Selector de Cuotas -->
+                    <div id="installments_section" class="mb-6 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Número de Cuotas</label>
+                        <select name="installments" class="w-full rounded-lg border-gray-300">
+                            {% for value, label in installment_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                     </div>
+
+                    <!-- Selector de estado de venta -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700">Estado</label>
+                        <select 
+                            id="status" 
+                            name="status"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required
+                        >
+                            {% for value, label in sale_status %}
+                                <option value="{{ value }}" {% if value == 'COMPLETED' %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Módulo de comisiones -->
+                    <!-- En create.html -->
+                    <div id="commission_details" class="mb-6 hidden">
+                        <div class="space-y-2 border-t pt-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">
+                                    Comisión 
+                                    <span id="commission_rate" class="text-sm">(0.00%)</span>:
+                                </span>
+                                <span id="commission_amount" class="font-medium">$ 0</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">IVA Comisión:</span>
+                                <span id="commission_tax" class="font-medium">$ 0</span>
+                            </div>
+                            <div class="flex justify-between items-center border-t pt-2">
+                                <span class="text-gray-600 font-medium">Total Comisión:</span>
+                                <span id="commission_total" class="font-medium">$ 0</span>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Botones de Acción -->
+                    <div class="space-y-3">
+                        
+                        <!-- <button type="button" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                            Completar Venta
+                        </button> -->
+                        <button type="button" 
+                                onclick="window.salesModule.completeSale()" 
+                                class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                            Completar Venta
+                        </button>
+                        
+                        <a href="{% url 'sales:list' %}" 
+                           class="block text-center w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script type="module" src="{% static 'js/sales/index.js' %}"></script>
+{% endblock %}
+
+
+

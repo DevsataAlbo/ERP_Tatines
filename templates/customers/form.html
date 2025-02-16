@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar{% else %}Nuevo{% endif %} Cliente - Sistema de Ventas
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-2xl font-semibold mb-6">
+                {% if form.instance.pk %}
+                    Editar Cliente
+                {% else %}
+                    Nuevo Cliente
+                {% endif %}
+            </h1>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Tipo de Cliente -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.customer_type.label }}
+                    </label>
+                    {{ form.customer_type }}
+                    {% if form.customer_type.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ form.customer_type.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- RUT -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.rut.label }}
+                    </label>
+                    {{ form.rut }}
+                    {% if form.rut.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ form.rut.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Campos para Persona Natural -->
+                <div id="person-fields" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.first_name.label }}
+                            </label>
+                            {{ form.first_name }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.last_name.label }}
+                            </label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campos para Empresa -->
+                <div id="company-fields" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.company_name.label }}
+                        </label>
+                        {{ form.company_name }}
+                    </div>
+                </div>
+
+                <!-- Campos Comunes -->
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.email.label }}
+                            </label>
+                            {{ form.email }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.phone.label }}
+                            </label>
+                            {{ form.phone }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.address.label }}
+                        </label>
+                        {{ form.address }}
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.comuna.label }}
+                            </label>
+                            {{ form.comuna }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.region.label }}
+                            </label>
+                            {{ form.region }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.comments.label }}
+                        </label>
+                        {{ form.comments }}
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex justify-end space-x-4">
+                    <a href="{% url 'customers:list' %}" 
+                       class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        Cancelar
+                    </a>
+                    <button type="submit" 
+                            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script type="module" src="{% static 'js/customers/form.js' %}"></script>
+{% endblock %}

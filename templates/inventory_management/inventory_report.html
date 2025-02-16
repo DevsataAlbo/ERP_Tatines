@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load inventory_tags %}
+
+{% block title %}Reporte de Inventario - {{ inventory.name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-5xl mx-auto">
+        <!-- Encabezado -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-semibold">Reporte de Inventario</h1>
+                <p class="text-gray-600">{{ inventory.name }}</p>
+            </div>
+            <div class="flex space-x-2">
+                <button onclick="printReport()" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-print mr-2"></i>Imprimir
+                </button>
+                <a href="{% url 'inventory_management:detail' inventory.pk %}" 
+                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-arrow-left mr-2"></i>Volver
+                </a>
+            </div>
+        </div>
+
+        <!-- Resumen General -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <p class="text-sm font-medium text-gray-500">Total Productos</p>
+                <p class="mt-1 text-2xl font-semibold">{{ total_items }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <p class="text-sm font-medium text-gray-500">Productos Contados</p>
+                <p class="mt-1 text-2xl font-semibold">{{ counted_items }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <p class="text-sm font-medium text-gray-500">Completado</p>
+                <p class="mt-1 text-2xl font-semibold">{{ completion_percentage }}%</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <p class="text-sm font-medium text-gray-500">Valor Diferencias</p>
+                <p class="mt-1 text-2xl font-semibold">$ {{ total_difference_value|intcomma }}</p>
+            </div>
+        </div>
+
+        <!-- Diferencias por Categoría -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-medium mb-4">Diferencias por Categoría</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diferencia Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valor Diferencia</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for difference in category_differences %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ difference.category }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="{% if difference.total_difference < 0 %}text-red-600{% elif difference.total_difference > 0 %}text-green-600{% endif %}">
+                                    {{ difference.total_difference }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                $ {{ difference.value_difference|intcomma }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="px-6 py-4 text-center text-gray-500">
+                                No hay diferencias registradas
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Productos con Mayores Diferencias -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-medium mb-4">Productos con Mayores Diferencias</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Esperado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diferencia</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for detail in top_differences %}
+                        <tr>
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-medium text-gray-900">{{ detail.product.name }}</div>
+                                <div class="text-sm text-gray-500">{{ detail.product.category.name }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ detail.expected_quantity }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ detail.actual_quantity }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="{% if detail.difference < 0 %}text-red-600{% elif detail.difference > 0 %}text-green-600{% endif %}">
+                                    {{ detail.difference }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                $ {{ detail.difference|multiply:detail.product.purchase_price|intcomma }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                No hay diferencias registradas
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Información de Auditoría -->
+        <div class="mt-6 bg-gray-50 rounded-lg p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500">
+                <div>
+                    <span class="font-medium">Creado por:</span>
+                    {{ inventory.created_by.get_full_name }}
+                </div>
+                <div>
+                    <span class="font-medium">Fecha de inicio:</span>
+                    {{ inventory.date_started|date:"d/m/Y H:i" }}
+                </div>
+                <div>
+                    <span class="font-medium">Finalizado por:</span>
+                    {{ inventory.reviewed_by.get_full_name|default:"-" }}
+                </div>
+                <div>
+                    <span class="font-medium">Fecha de finalización:</span>
+                    {{ inventory.date_finished|date:"d/m/Y H:i"|default:"-" }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function printReport() {
+        const printWindow = window.open('?format=pdf', '_blank');
+        printWindow.onload = function() {
+            printWindow.print();
+            setTimeout(() => {
+                printWindow.close();
+            }, 1000);
+        };
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,55 @@
+<header class="bg-white shadow-md rounded-lg p-4 flex justify-between items-center">
+    <div>
+        <h1 class="text-2xl font-bold">{% block header_title %}Dashboard{% endblock %}</h1>
+    </div>
+    
+    <div class="flex items-center">
+        <!-- Notificaciones -->
+        <div class="relative mr-4" x-data="{ open: false }">
+            <button @click="open = !open" class="relative">
+                <i class="fas fa-bell"></i>
+                <!-- Badge contador -->
+                <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs px-1.5">3</span>
+            </button>
+            <!-- Dropdown notificaciones -->
+            <div x-show="open" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg">
+                <!-- Top 3 productos próximos a vencer -->
+            </div>
+        </div>
+        <div class="mr-4">
+            <span class="text-gray-600">{{ request.user.get_full_name }}</span>
+        </div>
+        
+        <div class="relative group" x-data="{ open: false }">
+            <!-- Solo un botón de perfil -->
+            <button class="flex items-center focus:outline-none"
+                    @mouseenter="open = true">
+                {% if request.user.image %}
+                    <img src="{{ request.user.image.url }}" alt="Profile" class="w-10 h-10 rounded-full object-cover">
+                {% else %}
+                    <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                        <i class="fas fa-user text-gray-500"></i>
+                    </div>
+                {% endif %}
+            </button>
+            
+            <!-- Menú desplegable con tiempo de transición -->
+            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 transition-all duration-300"
+                 :class="{ 'block': open, 'hidden': !open }"
+                 @mouseleave="setTimeout(() => open = false, 1000)"
+                 @mouseenter="open = true">
+                <a href="{% url 'users:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <i class="fas fa-user mr-2"></i> Mi Perfil
+                </a>
+                <form method="post" action="{% url 'users:logout' %}" class="block">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</header>

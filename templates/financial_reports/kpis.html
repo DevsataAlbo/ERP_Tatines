@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}KPIs Financieros - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Filtros -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <form method="get" class="flex space-x-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Desde</label>
+                <input type="date" name="date_from" 
+                       value="{{ request.GET.date_from|default:'' }}"
+                       class="mt-1 block w-full rounded-md border-gray-300">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Hasta</label>
+                <input type="date" name="date_to" 
+                       value="{{ request.GET.date_to|default:'' }}"
+                       class="mt-1 block w-full rounded-md border-gray-300">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                    Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- KPIs de Ventas -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Ticket Promedio -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-medium mb-4">Ticket Promedio</h3>
+            <div class="text-3xl font-bold mb-2">$ {{ kpis.average_ticket|intcomma }}</div>
+            <div class="text-sm text-gray-500">
+                {% if kpis.ticket_trend > 0 %}
+                <span class="text-green-500">↑ {{ kpis.ticket_trend }}%</span>
+                {% else %}
+                <span class="text-red-500">↓ {{ kpis.ticket_trend|abs }}%</span>
+                {% endif %}
+                vs período anterior
+            </div>
+        </div>
+
+        <!-- ROI -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-medium mb-4">ROI</h3>
+            <div class="text-3xl font-bold mb-2">{{ kpis.roi|floatformat:1 }}%</div>
+            <div class="text-sm text-gray-500">
+                Retorno sobre inversión
+            </div>
+        </div>
+
+        <!-- Punto de Equilibrio -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-medium mb-4">Punto de Equilibrio</h3>
+            <div class="text-3xl font-bold mb-2">$ {{ kpis.break_even|intcomma }}</div>
+            <div class="text-sm text-gray-500">
+                Ventas necesarias: {{ kpis.break_even_percentage|floatformat }}%
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos más Rentables -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-medium mb-4">Top 10 Productos más Rentables</h3>
+        <canvas id="profitableProductsChart" class="h-96"></canvas>
+    </div>
+
+    <!-- Métricas de Gastos -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-medium mb-4">Gastos por Categoría</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <canvas id="expensesChart"></canvas>
+            <div class="space-y-4">
+                {% for category in kpis.expense_categories %}
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded">
+                    <div>
+                        <p class="font-medium">{{ category.name }}</p>
+                        <p class="text-sm text-gray-500">Promedio mensual: $ {{ category.monthly_avg|intcomma }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-medium">$ {{ category.total|intcomma }}</p>
+                        <p class="text-sm text-gray-500">{{ category.percentage|floatformat:1 }}%</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ kpis|json_script:"kpis-data" }}
+<script>
+    window.kpisData = JSON.parse(document.getElementById('kpis-data').textContent);
+</script>
+<script src="{% static 'js/financial_reports/kpis.js' %}"></script>
+{% endblock %}

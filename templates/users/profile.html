@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Perfil - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-semibold">Mi Perfil</h2>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Imagen actual o placeholder -->
+                    <div class="col-span-2 flex justify-center">
+                        {% if user.image %}
+                            <img src="{{ user.image.url }}" alt="Profile" class="w-32 h-32 rounded-full object-cover">
+                        {% else %}
+                            <div class="w-32 h-32 rounded-full bg-gray-300 flex items-center justify-center">
+                                <i class="fas fa-user text-gray-500 text-4xl"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Imagen -->
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Imagen de Perfil</label>
+                        {{ form.image }}
+                        {% if form.image.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.image.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Username -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Usuario</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.username.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Nombre -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nombre</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.first_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Apellidos -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Apellidos</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.last_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Teléfono -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Teléfono</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.phone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Dirección -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Dirección</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.address.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        Actualizar Perfil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

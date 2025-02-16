@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}Comparativas Financieras - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Filtros -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Año Base -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Año</label>
+                <select name="year" class="mt-1 block w-full rounded-md border-gray-300">
+                    {% for year in available_years %}
+                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Mes (opcional) -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Mes</label>
+                <select name="month" class="mt-1 block w-full rounded-md border-gray-300">
+                    <option value="">Todos</option>
+                    {% for month in months %}
+                        <option value="{{ month.0 }}" {% if month.0 == selected_month %}selected{% endif %}>
+                            {{ month.1 }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                    Comparar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Resumen Comparativo -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Comparación vs Mes Anterior -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-medium mb-4">vs Mes Anterior</h3>
+            <div class="space-y-4">
+                <!-- Ventas -->
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded">
+                    <span class="font-medium">Ventas</span>
+                    <div class="text-right">
+                        <span class="block font-medium">$ {{ monthly_comparison.sales|intcomma }}</span>
+                        <span class="text-sm {% if monthly_comparison.sales_trend >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                            {% if monthly_comparison.sales_trend >= 0 %}↑{% else %}↓{% endif %}
+                            {{ monthly_comparison.sales_trend|abs|floatformat:1 }}%
+                        </span>
+                    </div>
+                </div>
+                <!-- Utilidad -->
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded">
+                    <span class="font-medium">Utilidad</span>
+                    <div class="text-right">
+                        <span class="block font-medium">$ {{ monthly_comparison.profit|intcomma }}</span>
+                        <span class="text-sm {% if monthly_comparison.profit_trend >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                            {% if monthly_comparison.profit_trend >= 0 %}↑{% else %}↓{% endif %}
+                            {{ monthly_comparison.profit_trend|abs|floatformat:1 }}%
+                        </span>
+                    </div>
+                </div>
+                <!-- Gastos -->
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded">
+                    <span class="font-medium">Gastos</span>
+                    <div class="text-right">
+                        <span class="block font-medium">$ {{ monthly_comparison.expenses|intcomma }}</span>
+                        <span class="text-sm {% if monthly_comparison.expenses_trend <= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                            {% if monthly_comparison.expenses_trend >= 0 %}↑{% else %}↓{% endif %}
+                            {{ monthly_comparison.expenses_trend|abs|floatformat:1 }}%
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparación vs Año Anterior -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-medium mb-4">vs Año Anterior</h3>
+            <div class="space-y-4">
+                <!-- Similar al mensual pero con datos anuales -->
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded">
+                    <span class="font-medium">Ventas</span>
+                    <div class="text-right">
+                        <span class="block font-medium">$ {{ yearly_comparison.sales|intcomma }}</span>
+                        <span class="text-sm {% if yearly_comparison.sales_trend >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                            {% if yearly_comparison.sales_trend >= 0 %}↑{% else %}↓{% endif %}
+                            {{ yearly_comparison.sales_trend|abs|floatformat:1 }}%
+                        </span>
+                    </div>
+                </div>
+                <!-- Utilidad -->
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded">
+                    <span class="font-medium">Utilidad</span>
+                    <div class="text-right">
+                        <span class="block font-medium">$ {{ yearly_comparison.profit|intcomma }}</span>
+                        <span class="text-sm {% if yearly_comparison.profit_trend >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                            {% if yearly_comparison.profit_trend >= 0 %}↑{% else %}↓{% endif %}
+                            {{ yearly_comparison.profit_trend|abs|floatformat:1 }}%
+                        </span>
+                    </div>
+                </div>
+                <!-- Gastos -->
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded">
+                    <span class="font-medium">Gastos</span>
+                    <div class="text-right">
+                        <span class="block font-medium">$ {{ yearly_comparison.expenses|intcomma }}</span>
+                        <span class="text-sm {% if yearly_comparison.expenses_trend <= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                            {% if yearly_comparison.expenses_trend >= 0 %}↑{% else %}↓{% endif %}
+                            {{ yearly_comparison.expenses_trend|abs|floatformat:1 }}%
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos Comparativos -->
+    <div class="grid grid-cols-1 gap-6">
+        <!-- Ventas Mensuales Comparativas -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-medium mb-4">Comparativa Mensual de Ventas</h3>
+            <canvas id="monthlyComparisonChart" class="h-96"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ comparison_data|json_script:"comparison-data" }}
+<script>
+    window.comparisonData = JSON.parse(document.getElementById('comparison-data').textContent);
+</script>
+<script src="{% static 'js/financial_reports/comparisons.js' %}"></script>
+{% endblock %}

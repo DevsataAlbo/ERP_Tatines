@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}
+   {% if form.instance.pk %}Editar{% else %}Nuevo{% endif %} Proveedor
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+   <div class="max-w-3xl mx-auto">
+       <div class="bg-white rounded-lg shadow-md p-6">
+           <h1 class="text-2xl font-semibold mb-6">
+               {% if form.instance.pk %}
+                   Editar Proveedor: {{ form.instance.name }}
+               {% else %}
+                   Nuevo Proveedor de Medios de Pago
+               {% endif %}
+           </h1>
+
+           <form method="post" class="space-y-6">
+               {% csrf_token %}
+               
+               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <!-- Información básica -->
+                   <div class="space-y-4">
+                       <div>
+                           <label class="block text-sm font-medium text-gray-700">Nombre</label>
+                           {{ form.name }}
+                       </div>
+                       <div>
+                           <label class="block text-sm font-medium text-gray-700">Comisión Débito (%)</label>
+                           {{ form.debit_commission_rate }}
+                       </div>
+                       <div>
+                           <label class="block text-sm font-medium text-gray-700">Comisión Crédito (%)</label>
+                           {{ form.credit_commission_rate }}
+                       </div>
+                       <div>
+                           <label class="block text-sm font-medium text-gray-700">Número de Cuotas</label>
+                           {{ form.credit_installments }}
+                       </div>
+                   </div>
+
+                   <!-- Configuraciones adicionales -->
+                   <div class="space-y-4">
+                       <div>
+                           <label class="block text-sm font-medium text-gray-700">Días para Depósito</label>
+                           {{ form.deposit_delay_days }}
+                       </div>
+                       <div>
+                           <label class="flex items-center">
+                               {{ form.commission_includes_tax }}
+                               <span class="ml-2 text-sm text-gray-700">Comisión incluye IVA</span>
+                           </label>
+                       </div>
+                       <div>
+                           <label class="flex items-center">
+                               {{ form.machine_rental }}
+                               <span class="ml-2 text-sm text-gray-700">Arriendo de Máquina</span>
+                           </label>
+                       </div>
+                       <div>
+                           <label class="block text-sm font-medium text-gray-700">Costo Arriendo Mensual</label>
+                           {{ form.machine_rental_cost }}
+                       </div>
+                   </div>
+               </div>
+
+               <!-- Boletas Electrónicas -->
+               <div class="pt-4 border-t">
+                   <div class="space-y-4">
+                       <div>
+                           <label class="flex items-center">
+                               {{ form.electronic_billing }}
+                               <span class="ml-2 text-sm text-gray-700">Emisión de Boletas Electrónicas</span>
+                           </label>
+                       </div>
+                       <div>
+                           <label class="block text-sm font-medium text-gray-700">Costo Mensual Boletas</label>
+                           {{ form.electronic_billing_cost }}
+                       </div>
+                   </div>
+               </div>
+
+               <!-- Botones -->
+               <div class="flex justify-end space-x-3 pt-6">
+                   <a href="{% url 'payment_providers:list' %}" 
+                      class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                       Cancelar
+                   </a>
+                   <button type="submit" 
+                           class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                       Guardar
+                   </button>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
+{% endblock %}

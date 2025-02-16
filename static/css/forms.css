@@ -1,0 +1,53 @@
+/* Estilos base para inputs */
+.form-input {
+    @apply w-full px-4 py-2;
+    @apply border border-gray-300 rounded-lg;
+    @apply bg-gray-50;
+    @apply focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500;
+    @apply text-gray-900;
+    @apply placeholder:text-gray-500;
+    @apply disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed;
+  }
+  
+  /* Estilos para labels */
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+  
+  /* Estilos para el contenedor del input */
+  .form-group {
+    @apply mb-4;
+  }
+  
+  /* Estilos para inputs con error */
+  .form-input-error {
+    @apply border-red-500 focus:ring-red-500/50 focus:border-red-500;
+  }
+  
+  /* Mensaje de error */
+  .form-error-message {
+    @apply mt-1 text-sm text-red-600;
+  }
+  
+  /* Estilos para selects */
+  .form-select {
+    @apply form-input appearance-none;
+    @apply pr-8;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+  }
+  
+  /* Estilos para checkboxes y radios */
+  .form-checkbox,
+  .form-radio {
+    @apply h-4 w-4;
+    @apply border-gray-300 rounded;
+    @apply text-blue-600;
+    @apply focus:ring-2 focus:ring-blue-500/50;
+  }
+  
+  .form-radio {
+    @apply rounded-full;
+  }

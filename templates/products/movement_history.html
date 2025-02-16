@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% load product_filters %}
+
+{% block title %}Historial de Movimientos - {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-6xl mx-auto">
+        <!-- Encabezado -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-semibold">Historial de Movimientos</h1>
+                <p class="text-gray-600">{{ product.name }}</p>
+            </div>
+            <a href="{% url 'products:detail' product.pk %}" 
+               class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                Volver al Producto
+            </a>
+        </div>
+
+        <!-- Filtros -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tipo de Movimiento</label>
+                    <select name="movement_type" class="mt-1 block w-full rounded-md border-gray-300">
+                        <option value="">Todos</option>
+                        {% for value, label in movement_types %}
+                            <option value="{{ value }}" {% if request.GET.movement_type == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Desde</label>
+                    <input type="date" name="date_from" 
+                           value="{{ request.GET.date_from|default:'' }}"
+                           class="mt-1 block w-full rounded-md border-gray-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Hasta</label>
+                    <input type="date" name="date_to" 
+                           value="{{ request.GET.date_to|default:'' }}"
+                           class="mt-1 block w-full rounded-md border-gray-300">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabla de Movimientos -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Restante</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lote</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for movement in movements %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ movement.date|date:"d/m/Y H:i" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-sm rounded-full
+                                {% if movement.movement_type == 'IN' %}bg-green-100 text-green-800
+                                {% elif movement.movement_type == 'OUT' %}bg-red-100 text-red-800
+                                {% elif movement.movement_type == 'EDIT' %}bg-blue-100 text-blue-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ movement.get_movement_type_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ movement.quantity }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if movement.movement_type == 'IN' %}
+                                ${{ movement.purchase_price|intcomma }}
+                                {% if movement.is_price_with_tax %}
+                                    <span class="text-sm text-gray-500">(IVA inc.)</span>
+                                {% endif %}
+                            {% elif movement.movement_type == 'EDIT' %}
+                                {% if movement.changes_detail %}
+                                    <span class="text-sm text-gray-500">Ver detalles</span>
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ movement.remaining_quantity }}</td>
+                        <td>
+                            {% if movement.reference_detail %}
+                                {% if movement.reference_detail.url %}
+                                    <a href="{{ movement.reference_detail.url }}" class="text-blue-600 hover:text-blue-800">
+                                        {{ movement.reference_detail.tipo }} #{{ movement.reference_detail.numero }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-gray-600">
+                                        {{ movement.reference_detail.tipo }} #{{ movement.reference_detail.numero }}
+                                    </span>
+                                {% endif %}
+                                {% if movement.reference_detail.fecha %}
+                                    <br>
+                                    <small class="text-gray-500">{{ movement.reference_detail.fecha|date:"d/m/Y H:i" }}</small>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <!-- Reemplazar la sección de acciones en movement_history.html -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if movement.movement_type == 'EDIT' and movement.changes_detail %}
+                                <button onclick="showDetails(`{{ movement.changes_detail|safe|escapejs }}`, 'edit')"
+                                        class="text-blue-600 hover:text-blue-900">
+                                    <i class="fas fa-info-circle"></i> Ver Cambios
+                                </button>
+                            {% elif movement.movement_type == 'ADJ' and movement.changes_detail %}
+                                <button onclick="showDetails(`{{ movement.changes_detail|safe|escapejs }}`, 'adjustment')"
+                                        class="text-blue-600 hover:text-blue-900">
+                                    <i class="fas fa-info-circle"></i> Ver Detalles
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                            No hay movimientos registrados
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para detalles de edición -->
+<div id="editDetailsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium leading-6 text-gray-900 mb-2">Detalles de la Edición</h3>
+            <div id="editDetailsContent" class="mt-2">
+                <!-- El contenido se llenará dinámicamente -->
+            </div>
+            <div class="mt-4">
+                <!-- En el modal -->
+                <button type="button" onclick="closeEditDetailsModal()"
+                class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+                Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/products/movement_history.js' %}"></script>
+{% endblock %}

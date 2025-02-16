@@ -1,0 +1,172 @@
+<!-- Nuevo archivo: templates/inventory_management/print_report.html -->
+{% load humanize %}  {# Importante: agregar esta línea al inicio #}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ inventory.name }} - Reporte de Inventario</title>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            page-break-inside: auto;
+        }
+        thead {
+            display: table-header-group;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        .summary-box {
+            border: 1px solid #333;
+            padding: 15px;
+            margin-bottom: 30px;
+            background-color: #f9f9f9;
+        }
+        .negative { color: #dc2626; }
+        .positive { color: #059669; }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+        .category-name {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .audit-info {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ inventory.name }}</h1>
+        <p>Reporte de Inventario</p>
+    </div>
+
+    <div class="summary-box">
+        <table>
+            <tr>
+                <td width="25%"><strong>Total Productos:</strong></td>
+                <td width="25%">{{ total_items }}</td>
+                <td width="25%"><strong>Productos Contados:</strong></td>
+                <td width="25%">{{ counted_items }}</td>
+            </tr>
+            <tr>
+                <td><strong>Completado:</strong></td>
+                <td>{{ completion_percentage }}%</td>
+                <td><strong>Valor Diferencias:</strong></td>
+                <td>${{ total_difference_value|floatformat:0|intcomma }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <h2>Detalle por Productos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th width="30%">Producto</th>
+                <th width="15%">Stock Inicial</th>
+                <th width="15%">Stock Contado</th>
+                <th width="15%">Diferencia</th>
+                <th width="15%">Valor Diferencia</th>
+                <th width="10%">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detail in inventory.details.all %}
+            <tr>
+                <td>
+                    {{ detail.product.name }}<br>
+                    <span class="category-name">{{ detail.product.category.name }}</span>
+                </td>
+                <td>{{ detail.expected_quantity|floatformat:2 }}</td>
+                <td>{{ detail.actual_quantity|floatformat:2 }}</td>
+                <td class="{% if detail.difference_quantity < 0 %}negative{% else %}positive{% endif %}">
+                    {{ detail.difference_quantity|floatformat:2 }}
+                </td>
+                <td>${{ detail.difference_amount|floatformat:0|intcomma }}</td>
+                <td>{{ detail.adjustments.exists|yesno:"Ajustado,Pendiente" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Diferencias por Categoría</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Categoría</th>
+                <th>Diferencia Total</th>
+                <th>Valor Diferencia</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for difference in category_differences %}
+            <tr>
+                <td>{{ difference.category }}</td>
+                <td class="{% if difference.total_difference < 0 %}negative{% else %}positive{% endif %}">
+                    {{ difference.total_difference|floatformat:2 }}
+                </td>
+                <td>${{ difference.value_difference|floatformat:0|intcomma }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="audit-info">
+        <div>
+            <strong>Creado por:</strong> {{ inventory.created_by.get_full_name }}<br>
+            <strong>Fecha de inicio:</strong> {{ inventory.date_started|date:"d/m/Y H:i" }}
+        </div>
+        <div>
+            <strong>Finalizado por:</strong> {{ inventory.reviewed_by.get_full_name|default:"-" }}<br>
+            <strong>Fecha de finalización:</strong> {{ inventory.date_finished|date:"d/m/Y H:i"|default:"-" }}
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Reporte generado el {{ inventory.date_finished|date:"d/m/Y H:i" }}</p>
+    </div>
+</body>
+</html>

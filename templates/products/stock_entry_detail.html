@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Detalle de Ingreso - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <!-- Encabezado -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold">Detalle de Ingreso</h2>
+                <a href="{% url 'products:stock_entry_list' %}" 
+                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                    Volver al Listado
+                </a>
+            </div>
+
+            <!-- Información general -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <p class="text-sm text-gray-600">Fecha</p>
+                    <p class="font-medium">{{ entry.date|date:"d/m/Y" }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Proveedor</p>
+                    <p class="font-medium">{{ entry.supplier.name }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Documento</p>
+                    <p class="font-medium">{{ entry.get_document_type_display }} #{{ entry.document_number }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Registrado por</p>
+                    <p class="font-medium">{{ entry.created_by.get_full_name }}</p>
+                </div>
+            </div>
+
+            <!-- Productos -->
+            <div class="mt-6">
+                <h3 class="text-lg font-medium mb-4">Productos Ingresados</h3>
+                <div class="bg-white rounded-lg overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lote</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vencimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for detail in entry.stockentrydetail_set.all %}
+                            <tr>
+                                <td class="px-6 py-4">{{ detail.product.name }}</td>
+                                <td class="px-6 py-4">{{ detail.quantity }}</td>
+                                <td class="px-6 py-4">
+                                    $ {{ detail.purchase_price|intcomma }}
+                                    {% if detail.is_price_with_tax %}
+                                        <span class="text-sm text-gray-500">(IVA inc.)</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4">{{ detail.batch_number|default:"-" }}</td>
+                                <td class="px-6 py-4">
+                                    {% if detail.expiration_date %}
+                                        {{ detail.expiration_date|date:"d/m/Y" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if entry.notes %}
+            <div class="mt-6">
+                <h3 class="text-lg font-medium mb-2">Notas</h3>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    {{ entry.notes|linebreaks }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Información de auditoría -->
+            <div class="mt-6 text-sm text-gray-500">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <span class="font-medium">Fecha de creación:</span>
+                        {{ entry.created_at|date:"d/m/Y H:i" }}
+                    </div>
+                    <div>
+                        <span class="font-medium">Última actualización:</span>
+                        {{ entry.updated_at|date:"d/m/Y H:i" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

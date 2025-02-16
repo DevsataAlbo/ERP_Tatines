@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ inventory.name }} - Detalle de Inventario{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6" data-inventory-id="{{ inventory.id }}"></div>
+    <div class="max-w-4xl mx-auto">
+        <!-- Encabezado -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-semibold">{{ inventory.name }}</h1>
+                <p class="text-gray-600">{{ inventory.get_status_display }}</p>
+            </div>
+            <div class="flex space-x-2">
+                {% if inventory.status == 'draft' %}
+                    <a href="{% url 'inventory_management:update' inventory.pk %}" 
+                       class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-edit mr-2"></i>Editar
+                    </a>
+                    <button type="button"
+                            id="startCountButton"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-play mr-2"></i>Iniciar Conteo
+                    </button>
+                {% elif inventory.status == 'in_progress' %}
+                    <a href="{% url 'inventory_management:count_process' inventory.pk %}" 
+                       class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-clipboard-list mr-2"></i>Continuar Conteo
+                    </a>
+                {% endif %}
+                
+                {% if inventory.status == 'completed' %}
+                    <a href="{% url 'inventory_management:report' inventory.pk %}" 
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-file-alt mr-2"></i>Ver Reporte
+                    </a>
+                    <a href="{% url 'inventory_management:process_adjustments' inventory.pk %}" 
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-balance-scale mr-2"></i>Procesar Ajustes
+                    </a>
+                    <a href="{% url 'inventory_management:edit_inventory' inventory.pk %}" 
+                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-edit mr-2"></i>Editar Inventario
+                    </a>
+                    <a href="{% url 'inventory_management:list' %}" 
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-arrow-left mr-2"></i>Volver
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Productos</p>
+                    <p class="mt-1 text-2xl font-semibold">
+                        {{ total_products }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Productos Contados</p>
+                    <p class="mt-1 text-2xl font-semibold" id="counted-products">
+                        {{ counted_products }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Pendientes</p>
+                    <p class="mt-1 text-2xl font-semibold" id="pending-products">
+                        {{ pending_products }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Con Diferencias</p>
+                    <p class="mt-1 text-2xl font-semibold" id="products-with-differences">
+                        {{ products_with_differences }}
+                    </p>
+                </div>
+                <div class="lg:col-span-2">
+                    <p class="text-sm font-medium text-gray-500">Progreso</p>
+                    <div class="mt-2">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full progress-bar-fill w-0" 
+                                 data-progress="{{ inventory.progress_percentage }}">
+                            </div>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-600">
+                            <span id="progress-percentage">{{ inventory.progress_percentage }}</span>%
+                        </p>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <p class="text-sm font-medium text-gray-500">Fecha de Inicio</p>
+                    <p class="mt-1 text-lg">{{ inventory.date_started|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Productos -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="p-4 border-b">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium">Detalle de Productos</h3>
+                    <div class="flex space-x-2">
+                        <input type="text" 
+                               id="searchInput"
+                               placeholder="Buscar producto..."
+                               class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                        <select id="statusFilter"
+                                class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                            <option value="all">Todos</option>
+                            <option value="pending">Pendientes</option>
+                            <option value="counted">Contados</option>
+                            <option value="differences">Con Diferencias</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Esperado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diferencia</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Responsable</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Último Conteo</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for detail in inventory.details.all %}
+                        <tr class="product-row" data-status="{{ detail.actual_quantity|yesno:'counted,pending' }}">
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-medium text-gray-900">{{ detail.product.name }}</div>
+                                <div class="text-sm text-gray-500">{{ detail.product.category.name }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ detail.expected_quantity }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ detail.actual_quantity|default:"-" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if detail.actual_quantity %}
+                                    <span class="{% if detail.difference_quantity < 0 %}text-red-600{% elif detail.difference_quantity > 0 %}text-green-600{% endif %}">
+                                        {{ detail.difference_quantity }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if detail.actual_quantity %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Contado
+                                    </span>
+                                {% else %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        Pendiente
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ detail.counted_by.get_full_name|default:"-" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ detail.last_counted_at|date:"d/m/Y H:i"|default:"-" }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Información adicional -->
+        {% if inventory.notes %}
+        <div class="mt-6 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-medium mb-2">Notas</h3>
+            <p class="text-gray-700 whitespace-pre-line">{{ inventory.notes }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Información de auditoría -->
+        <div class="mt-6 bg-gray-50 rounded-lg p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500">
+                <div>
+                    <span class="font-medium">Creado por:</span>
+                    {{ inventory.created_by.get_full_name }}
+                </div>
+                <div>
+                    <span class="font-medium">Fecha de creación:</span>
+                    {{ inventory.created_at|date:"d/m/Y H:i" }}
+                </div>
+                {% if inventory.reviewed_by %}
+                <div>
+                    <span class="font-medium">Revisado por:</span>
+                    {{ inventory.reviewed_by.get_full_name }}
+                </div>
+                {% endif %}
+                {% if inventory.date_finished %}
+                <div>
+                    <span class="font-medium">Fecha de finalización:</span>
+                    {{ inventory.date_finished|date:"d/m/Y H:i" }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pasar el ID del inventario al JavaScript -->
+<script>
+    const inventoryId = '{{ inventory.id|escapejs }}';
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/inventory_management/inventory_detail.js' %}"></script>
+{% endblock %}

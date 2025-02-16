@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load product_filters %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Detalle de Producto{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <!-- Encabezado -->
+            <div class="border-b px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-gray-900">{{ product.name }}</h1>
+                        <p class="text-sm text-gray-600">SKU: {{ product.sku }}</p>
+                    </div>
+                    {% if request.user.role == 'admin' %}
+                        <div class="flex space-x-2">
+                            {% if product.bulk_products.exists %}
+                                <a href="{% url 'products:open_sack' product.pk %}" 
+                                class="inline-flex items-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg">
+                                    <i class="fas fa-box-open mr-2"></i>
+                                    Abrir Saco (Stock: {{ product.stock }})
+                                </a>
+                            {% endif %}
+                            <!-- Nuevo botón de Merma -->
+                            <button type="button" 
+                                    id="openMermaModal"
+                                    class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
+                                Registrar Merma
+                            </button>
+                            <!-- Nuevo botón de historial -->
+                            <a href="{% url 'products:movement_history' product.pk %}" 
+                            class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded">
+                                Ver Historial
+                            </a>
+                            <a href="{% url 'products:update' product.pk %}" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                                Editar
+                            </a>
+                            <a href="{% url 'products:delete' product.pk %}" 
+                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                                Eliminar
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="p-6">
+                <!-- Imagen y Detalles Básicos -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Imagen -->
+                    <div class="flex justify-center">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" 
+                                 class="max-h-64 object-contain rounded">
+                        {% else %}
+                            <div class="h-64 w-64 bg-gray-200 flex items-center justify-center rounded">
+                                <span class="text-gray-500">Sin imagen</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Información Básica -->
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">Marca</h3>
+                            <p class="mt-1 text-lg text-gray-900">{{ product.brand }}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">Categoría</h3>
+                            <p class="mt-1 text-lg text-gray-900">{{ product.category.name }}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">Stock</h3>
+                            <p class="mt-1">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if product.stock > 10 %}
+                                        bg-green-100 text-green-800
+                                    {% elif product.stock > 0 %}
+                                        bg-yellow-100 text-yellow-800
+                                    {% else %}
+                                        bg-red-100 text-red-800
+                                    {% endif %}">
+                                    {{ product.stock }} unidades
+                                </span>
+                            </p>
+                        </div>
+
+                        {% if show_admin_message %}
+                        <div class="text-sm text-gray-600 mt-2">
+                            La activación/desactivación de productos solo está disponible desde el panel de administración
+                        </div>
+                        {% endif %}
+
+                        {% if product.is_bulk %}
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">Stock a Granel</h3>
+                            <p class="mt-1">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if product.bulk_stock > 10 %}
+                                        bg-green-100 text-green-800
+                                    {% elif product.bulk_stock > 0 %}
+                                        bg-yellow-100 text-yellow-800
+                                    {% else %}
+                                        bg-red-100 text-red-800
+                                    {% endif %}">
+                                    {{ product.bulk_stock|floatformat:2 }} kg
+                                </span>
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Información de Precios -->
+                <div class="mt-8 border-t pt-6">
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">Información de Precios</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% if product.is_bulk %}
+                        <!-- Precios para producto a granel -->
+                        <div class="bg-gray-50 p-4 rounded">
+                            <h3 class="text-sm font-medium text-gray-500">Precio de Compra por Kilo</h3>
+                            <p class="mt-1 text-lg font-medium text-gray-900">
+                                $ {{ product.get_weighted_average_purchase_price|intcomma }}
+                                {% if product.is_purchase_with_tax %}
+                                    <span class="text-sm text-gray-500">(IVA incluido)</span>
+                                {% endif %}
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Neto: $ {{ product.get_weighted_average_purchase_price|divided_by:'1.19'|intcomma }}
+                            </p>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded">
+                            <h3 class="text-sm font-medium text-gray-500">Precio de Venta por Kilo</h3>
+                            <p class="mt-1 text-lg font-medium text-gray-900">
+                                $ {{ product.get_granel_sale_price|intcomma }}
+                                {% if product.is_sale_with_tax %}
+                                    <span class="text-sm text-gray-500">(IVA incluido)</span>
+                                {% endif %}
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Neto: $ {{ product.get_granel_sale_price|divided_by:'1.19'|intcomma }}
+                            </p>
+                        </div>
+
+                        <!-- Información de Precios Históricos -->
+                        <div class="bg-gray-50 p-4 rounded col-span-2">
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h3 class="text-lg font-medium mb-2">Información de Precios y Rentabilidad</h3>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Último Precio de Compra por Kilo:</span>
+                                        <span>${{ product.get_weighted_average_purchase_price|intcomma }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Precio Promedio Ponderado por Kilo:</span>
+                                        <span>${{ product.get_weighted_average_purchase_price|intcomma }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Rentabilidad Actual:</span>
+                                        <span class="{% if product.calculate_granel_profit_percentage < 20 %}text-red-600{% else %}text-green-600{% endif %}">
+                                            {{ product.calculate_granel_profit_percentage }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <!-- Precios de Compra -->
+                        <div class="bg-gray-50 p-4 rounded">
+                            <h3 class="text-sm font-medium text-gray-500">Precio de Compra</h3>
+                            <p class="mt-1 text-lg font-medium text-gray-900">
+                                $ {{ product.purchase_price|intcomma }}
+                                {% if product.is_purchase_with_tax %}
+                                    <span class="text-sm text-gray-500">(IVA incluido)</span>
+                                {% endif %}
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Neto: $ {{ product.get_purchase_price_without_tax|intcomma }}
+                            </p>
+                        </div>
+
+                        <!-- Precios de Venta -->
+                        <div class="bg-gray-50 p-4 rounded">
+                            <h3 class="text-sm font-medium text-gray-500">Precio de Venta</h3>
+                            <p class="mt-1 text-lg font-medium text-gray-900">
+                                $ {{ product.sale_price|intcomma }}
+                                {% if product.is_sale_with_tax %}
+                                    <span class="text-sm text-gray-500">(IVA incluido)</span>
+                                {% endif %}
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Neto: $ {{ product.get_sale_price_without_tax|intcomma }}
+                            </p>
+                        </div>
+
+                        <!-- Información de Precios Históricos -->
+                        <div class="bg-gray-50 p-4 rounded col-span-2">
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h3 class="text-lg font-medium mb-2">Histórico de Precios</h3>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Precio de Compra Original:</span>
+                                        <span>${{ product.purchase_price|intcomma }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Último Precio de Compra:</span>
+                                        <span>${{ product.current_purchase_price|intcomma }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Precio Promedio Ponderado:</span>
+                                        <span>${{ product.weighted_average_price|intcomma }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Rentabilidad Actual:</span>
+                                        <span class="{% if product.calculate_profit_percentage < 20 %}text-red-600{% else %}text-green-600{% endif %}">
+                                            {{ product.calculate_profit_percentage }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                {% if product.description %}
+                <div class="mt-8 border-t pt-6">
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">Descripción</h2>
+                    <p class="text-gray-700 whitespace-pre-line">{{ product.description }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Fechas -->
+                <div class="mt-8 border-t pt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500">
+                        <div>
+                            <span class="font-medium">Fecha de creación:</span>
+                            {{ product.created|date:"d/m/Y H:i" }}
+                        </div>
+                        <div>
+                            <span class="font-medium">Última actualización:</span>
+                            {{ product.updated|date:"d/m/Y H:i" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón Volver -->
+        <div class="mt-6">
+            <a href="{% url 'products:list' %}" 
+                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                Volver a la lista
+            </a>
+        </div>
+
+        {% include 'products/includes/merma_modal.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/products/merma.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Nuevo Ajuste de Inventario{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-2xl mx-auto">
+        <!-- Encabezado -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-semibold">Nuevo Ajuste de Inventario</h1>
+                <p class="text-gray-600">{{ inventory.name }}</p>
+            </div>
+            <a href="{% url 'inventory_management:adjustments' inventory.pk %}" 
+               class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                <i class="fas fa-arrow-left mr-2"></i>Volver
+            </a>
+        </div>
+
+        <!-- Formulario -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <form method="post" id="adjustmentForm" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Producto -->
+                <div>
+                    <label for="{{ form.product.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Producto
+                    </label>
+                    {{ form.product }}
+                    {% if form.product.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.product.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Diferencia de Cantidad -->
+                <div>
+                    <label for="{{ form.quantity_difference.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Diferencia de Cantidad
+                    </label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        {{ form.quantity_difference }}
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Use valores negativos para disminuciones y positivos para aumentos
+                    </p>
+                    {% if form.quantity_difference.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.quantity_difference.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Justificación -->
+                <div>
+                    <label for="{{ form.justification.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Justificación
+                    </label>
+                    {{ form.justification }}
+                    {% if form.justification.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.justification.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Botones -->
+                <div class="flex justify-end space-x-3">
+                    <button type="button"
+                            class="cancel-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        Crear Ajuste
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/inventory_management/adjustment_form.js' %}"></script>
+{% endblock %}

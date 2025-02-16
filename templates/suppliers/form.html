@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar{% else %}Nuevo{% endif %} Proveedor - Sistema de Ventas
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-6">
+                {% if form.instance.pk %}
+                    Editar Proveedor: {{ form.instance.name }}
+                {% else %}
+                    Nuevo Proveedor
+                {% endif %}
+            </h2>
+
+            <form method="post" id="supplierForm">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <!-- Información Básica -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Información Básica</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nombre o Razón Social</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ form.name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">RUT</label>
+                            {{ form.rut }}
+                            {% if form.rut.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ form.rut.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Nombre de Fantasía</label>
+                            {{ form.business_name }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de Contacto -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Información de Contacto</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nombre de Contacto</label>
+                            {{ form.contact_name }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Teléfono Principal</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ form.phone.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Teléfono Alternativo</label>
+                            {{ form.alternative_phone }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Email Principal</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Email Alternativo</label>
+                            {{ form.alternative_email }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dirección -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Dirección</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Dirección</label>
+                            {{ form.address }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Ciudad</label>
+                            {{ form.city }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Región</label>
+                            {{ form.region }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Adicional -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Información Adicional</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Sitio Web</label>
+                            {{ form.website }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Notas</label>
+                            {{ form.notes }}
+                        </div>
+                        <div class="flex items-center">
+                            {{ form.is_active }}
+                            <label class="ml-2 text-sm text-gray-700">Activo</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex justify-end space-x-4">
+                    <a href="{% url 'suppliers:list' %}" 
+                       class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                        Cancelar
+                    </a>
+                    <button type="submit" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        {% if form.instance.pk %}Actualizar{% else %}Guardar{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/suppliers/form.js' %}"></script>
+{% endblock %}

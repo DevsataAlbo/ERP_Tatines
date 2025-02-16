@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}Análisis de Tendencias - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Filtros -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <form method="get" class="flex space-x-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Desde</label>
+                <input type="date" name="date_from" 
+                       value="{{ request.GET.date_from|default:'' }}"
+                       class="mt-1 block w-full rounded-md border-gray-300">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Hasta</label>
+                <input type="date" name="date_to" 
+                       value="{{ request.GET.date_to|default:'' }}"
+                       class="mt-1 block w-full rounded-md border-gray-300">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                    Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Gráficos de Tendencias -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Ventas vs Gastos -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4">Ventas vs Gastos</h2>
+            <canvas id="salesVsExpensesChart" class="w-full h-96"></canvas>
+        </div>
+
+        <!-- Rentabilidad Mensual -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4">Rentabilidad Mensual</h2>
+            <canvas id="profitabilityChart" class="w-full h-96"></canvas>
+        </div>
+    </div>
+
+    <!-- Métricas por Método de Pago -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">Distribución por Método de Pago</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <canvas id="paymentMethodsChart" class="w-full h-64"></canvas>
+            </div>
+            <div class="space-y-4">
+                {% for method in detailed_trends.payment_methods %}
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium">{{ method.get_payment_method_display }}</p>
+                        <p class="text-sm text-gray-500">{{ method.count }} transacciones</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-medium">$ {{ method.total|intcomma }}</p>
+                        <p class="text-sm text-gray-500">{{ method.percentage|floatformat:1 }}%</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ detailed_trends|json_script:"trends-data" }}
+<script>
+    window.trendsData = JSON.parse(document.getElementById('trends-data').textContent);
+</script>
+<script src="{% static 'js/financial_reports/trends.js' %}"></script>
+{% endblock %}

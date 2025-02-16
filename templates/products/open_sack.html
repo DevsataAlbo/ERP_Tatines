@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-lg mx-auto">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-6">Abrir Sacos de {{ product.name }}</h2>
+            
+            <div class="mb-6">
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-gray-600">Formato del producto:</p>
+                        <p class="font-medium">{{ product.kilos_per_sack }} kg</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Stock disponible:</p>
+                        <ul class="list-disc list-inside ml-4">
+                            <li>Sacos: {{ product.stock }}</li>
+                            {% for bulk_product in product.bulk_products.all %}
+                                <li>Stock a granel: {{ bulk_product.bulk_stock|floatformat:2 }} kg</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="{{ form.quantity.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            {{ form.quantity.label }}
+                        </label>
+                        {{ form.quantity }}
+                        {% if form.quantity.errors %}
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ form.quantity.errors.0 }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            {{ form.notes.label }}
+                        </label>
+                        {{ form.notes }}
+                    </div>
+                </div>
+
+                <div class="mt-6 space-y-3">
+                    <button type="submit" 
+                            class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                        Confirmar Apertura
+                    </button>
+                    
+                    <a href="{% url 'products:detail' product.pk %}" 
+                       class="block text-center w-full bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

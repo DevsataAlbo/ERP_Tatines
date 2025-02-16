@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}Exportar Reportes - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Selección de Reporte -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Exportar Reportes</h2>
+        
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Tipo de Reporte -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Reporte</label>
+                <select name="report_type" class="w-full rounded-lg border-gray-300" id="reportType">
+                    <option value="income_statement">Estado de Resultados</option>
+                    <option value="sales_detail">Detalle de Ventas</option>
+                    <option value="expense_detail">Detalle de Gastos</option>
+                    <option value="profitability">Análisis de Rentabilidad</option>
+                </select>
+            </div>
+
+            <!-- Período -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Desde</label>
+                    <input type="date" name="date_from" 
+                           class="w-full rounded-lg border-gray-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Hasta</label>
+                    <input type="date" name="date_to" 
+                           class="w-full rounded-lg border-gray-300">
+                </div>
+            </div>
+
+            <!-- Formato -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Formato</label>
+                <div class="space-x-4">
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="format" value="pdf" class="form-radio" checked>
+                        <span class="ml-2">PDF</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="format" value="excel" class="form-radio">
+                        <span class="ml-2">Excel</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Vista Previa del Reporte -->
+            <div id="reportPreview" class="border rounded-lg p-4 bg-gray-50">
+                <h3 class="font-medium mb-2">El reporte incluirá:</h3>
+                <div id="reportContent" class="text-sm text-gray-600">
+                    <!-- Contenido dinámico via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'financial_reports:dashboard' %}" 
+                   class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg">
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">
+                    Generar Reporte
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/financial_reports/export.js' %}"></script>
+{% endblock %}

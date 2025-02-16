@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ supplier.name }} - Detalle de Proveedor{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header con botones de acción -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-semibold">{{ supplier.name }}</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'suppliers:list' %}" 
+                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-arrow-left mr-2"></i>Volver
+                </a>
+                <a href="{% url 'suppliers:update' supplier.pk %}" 
+                   class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-edit mr-2"></i>Editar
+                </a>
+                <a href="{% url 'suppliers:delete' supplier.pk %}" 
+                   class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-trash mr-2"></i>Eliminar
+                </a>
+            </div>
+        </div>
+
+        <!-- Información del Proveedor -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <!-- Información Básica -->
+            <div class="p-6 border-b">
+                <h2 class="text-lg font-semibold mb-4">Información Básica</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">RUT</p>
+                        <p class="font-medium">{{ supplier.rut }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Nombre de Fantasía</p>
+                        <p class="font-medium">{{ supplier.business_name|default:"-" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Estado</p>
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {% if supplier.is_active %}
+                                bg-green-100 text-green-800
+                            {% else %}
+                                bg-red-100 text-red-800
+                            {% endif %}">
+                            {{ supplier.is_active|yesno:"Activo,Inactivo" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Contacto -->
+            <div class="p-6 border-b">
+                <h2 class="text-lg font-semibold mb-4">Información de Contacto</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Contacto</p>
+                        <p class="font-medium">{{ supplier.contact_name|default:"-" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Teléfono Principal</p>
+                        <p class="font-medium">{{ supplier.phone }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Teléfono Alternativo</p>
+                        <p class="font-medium">{{ supplier.alternative_phone|default:"-" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Email Principal</p>
+                        <p class="font-medium">{{ supplier.email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Email Alternativo</p>
+                        <p class="font-medium">{{ supplier.alternative_email|default:"-" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dirección -->
+            <div class="p-6 border-b">
+                <h2 class="text-lg font-semibold mb-4">Dirección</h2>
+                <p>{{ supplier.full_address }}</p>
+            </div>
+
+            <!-- Últimos Ingresos de Stock -->
+            <div class="p-6">
+                <h2 class="text-lg font-semibold mb-4">Últimos Ingresos de Stock</h2>
+                {% if stock_entries %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Documento</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Productos</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for entry in stock_entries %}
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ entry.date|date:"d/m/Y" }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        {{ entry.get_document_type_display }} #{{ entry.document_number }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        {{ entry.stockentrydetail_set.count }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <a href="{% url 'products:stock_entry_detail' entry.pk %}" 
+                                           class="text-blue-600 hover:text-blue-900">
+                                            Ver Detalle
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-gray-500">No hay ingresos de stock registrados</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

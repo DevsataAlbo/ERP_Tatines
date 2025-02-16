@@ -1,0 +1,412 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar{% else %}Crear{% endif %} Producto - Sistema de Ventas
+{% endblock %}
+
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-6">
+                {% if form.instance.pk %}
+                    Editar Producto: {{ form.instance.name }}
+                {% else %}
+                    Crear Nuevo Producto
+                {% endif %}
+            </h2>
+
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <!-- Datos Básicos -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Nombre del Producto</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <p class="text-red-500 text-xs mt-1 p-2 bg-gray-100 border border-gray-300 shadow-sm">{{ form.name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Marca</label>
+                        {{ form.brand }}
+                        {% if form.brand.errors %}
+                            <p class="text-red-500 text-xs mt-1 bg-gray-50 border border-gray-300 shadow-sm">{{ form.brand.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Categoría</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.category.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Configuración de Granel -->
+                <div class="border-t pt-4 mt-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Configuración de Granel</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Es producto a granel -->
+                        <div>
+                            <div class="flex items-center">
+                                {{ form.is_bulk }}
+                                <label for="{{ form.is_bulk.id_for_label }}" class="ml-2 text-sm text-gray-600">
+                                    ¿Es producto a granel?
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Precio venta granel -->
+                        <div class="bulk-config-field {% if not form.instance.is_bulk %}hidden{% endif %}">
+                            <label class="block text-sm font-medium text-gray-700">Precio de venta por kilo</label>
+                            {{ form.bulk_sale_price }}
+                        </div>
+
+                        <!-- Productos vinculados -->
+                        <div class="col-span-2 bulk-config-field {% if not form.instance.is_bulk %}hidden{% endif %}">
+                            <label class="block text-sm font-medium text-gray-700">Productos vinculados</label>
+                            {{ form.linked_products }}
+                        </div>
+                    </div>
+                </div>
+                    
+                <div class="regular-fields {% if form.instance.is_bulk %}hidden{% endif %}">
+                        <!-- Resto de campos para productos normales -->
+                        <!-- Precios y Cálculos -->
+                        <div class="border-t pt-4 mt-4">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Precios</h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Precio de compra -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Precio de Compra</label>
+                                    {{ form.purchase_price }}
+                                    {% if form.purchase_price.errors %}
+                                        <p class="text-red-500 text-xs mt-1 bg-gray-50 border border-gray-300 shadow-sm">{{ form.purchase_price.errors.0 }}</p>
+                                    {% endif %}
+                                    <div class="mt-2">
+                                        <label class="inline-flex items-center">
+                                            {{ form.is_purchase_with_tax }}
+                                            <span class="ml-2 text-sm text-gray-600">Incluye IVA</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <!-- Precio de Venta -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Precio de Venta</label>
+                                    {{ form.sale_price }}
+                                    {% if form.sale_price.errors %}
+                                        <p class="text-red-500 text-xs mt-1">{{ form.sale_price.errors.0 }}</p>
+                                    {% endif %}
+                                    <div class="mt-2">
+                                        <label class="inline-flex items-center">
+                                            {{ form.is_sale_with_tax }}
+                                            <span class="ml-2 text-sm text-gray-600">Incluye IVA</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Rentabilidad calculada -->
+                                <div class="col-span-2 bg-gray-50 p-4 rounded">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <span class="text-sm text-gray-600">Precio de Compra (sin IVA):</span>
+                                            <span class="font-medium ml-2">$ <span id="netPurchasePrice">0</span></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-gray-600">Precio de Venta (sin IVA):</span>
+                                            <span class="font-medium ml-2">$ <span id="netSalePrice">0</span></span>
+                                        </div>
+                                        <div class="col-span-2">
+                                            <span class="text-sm text-gray-600">Rentabilidad:</span>
+                                            <span class="font-medium ml-2"><span id="profitPercentage">0</span>%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input de vencimiento del producto -->
+                        <div class="border-t pt-4 mt-4">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Control de Vencimiento</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    {{ form.requires_expiration }}
+                                    <label for="{{ form.requires_expiration.id_for_label }}" class="ml-2 text-sm text-gray-600">
+                                        {{ form.requires_expiration.label }}
+                                    </label>
+                                </div>
+                                {% if form.requires_expiration.help_text %}
+                                    <p class="mt-1 text-sm text-gray-500">{{ form.requires_expiration.help_text }}</p>
+                                {% endif %}
+                        
+                                <!-- Campos de vencimiento -->
+                                <div id="expiration-fields" class="space-y-4" style="display: none;">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">{{ form.initial_batch_number.label }}</label>
+                                        {{ form.initial_batch_number }}
+                                        {% if form.initial_batch_number.errors %}
+                                            <p class="mt-1 text-sm text-red-600">{{ form.initial_batch_number.errors.0 }}</p>
+                                        {% endif %}
+                                    </div>
+                        
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">{{ form.expiration_date.label }}</label>
+                                        {{ form.expiration_date }}
+                                        {% if form.expiration_date.errors %}
+                                            <p class="mt-1 text-sm text-red-600">{{ form.expiration_date.errors.0 }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if form.warnings %}
+                            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+                                {% for warning in form.warnings %}
+                                    <p>{{ warning }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Datos Adicionales -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Stock</label>
+                                {{ form.stock }}
+                                {% if form.stock.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ form.stock.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Kilos por saco</label>
+                                {{ form.kilos_per_sack }}
+                                {% if form.kilos_per_sack.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ form.kilos_per_sack.errors.0 }}</p>
+                                {% endif %}
+                                {% if form.kilos_per_sack.help_text %}
+                                    <p class="mt-1 text-sm text-gray-500">{{ form.kilos_per_sack.help_text }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Descripción</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ form.description.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Imagen del Producto</label>
+                                {{ form.image }}
+                                {% if form.image.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ form.image.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                </div>
+
+                
+
+                <!-- Botones de acción -->
+                <div class="flex justify-end space-x-4 mt-6">
+                    <a href="{% url 'products:list' %}" 
+                       class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                        Cancelar
+                    </a>
+                    <button type="submit" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        {% if form.instance.pk %}Actualizar{% else %}Crear{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="{% static 'js/products/form.js' %}"></script>
+<script src="{% static 'js/products/bulk_config.js' %}"></script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Configuración de Granel -->
+<!-- 
+
+<div class="border-t pt-4 mt-4">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Configuración de Granel</h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <div class="flex items-center">
+                {{ form.is_bulk }}
+                <label for="{{ form.is_bulk.id_for_label }}" class="ml-2 text-sm text-gray-600">
+                    ¿Es producto a granel?
+                </label>
+            </div>
+            {% if form.is_bulk.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.is_bulk.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="bulk-config-fields {% if not form.instance.is_bulk %}hidden{% endif %}">
+            <label class="block text-sm font-medium text-gray-700">Precio de venta por kilo</label>
+            {{ form.bulk_sale_price }}
+            {% if form.bulk_sale_price.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.bulk_sale_price.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="col-span-2 bulk-config-fields {% if not form.instance.is_bulk %}hidden{% endif %}">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Productos que pueden abrirse</label>
+            <div class="border rounded-lg p-4 bg-gray-50">
+                {{ form.linked_products }}
+                {% if form.linked_products.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.linked_products.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-2 text-sm text-gray-500">
+                    Seleccione los productos que pueden abrirse para venta a granel. 
+                    Solo se mostrarán productos de la misma marca.
+                </p>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+
+<!-- Sección de Venta a Granel -->
+<!-- <div class="border-t pt-4 mt-4">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Venta a Granel</h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <div class="flex items-center">
+                {{ form.has_bulk_sales }}
+                <label for="{{ form.has_bulk_sales.id_for_label }}" class="ml-2 text-sm text-gray-600">
+                    ¿Vende a granel?
+                </label>
+            </div>
+        </div>
+        
+        <div class="bulk-fields {% if not form.instance.has_bulk_sales %}hidden{% endif %}">
+            <label class="block text-sm font-medium text-gray-700">Kilos por saco</label>
+            {{ form.kilos_per_sack }}
+            {% if form.kilos_per_sack.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.kilos_per_sack.errors.0 }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="bulk-fields {% if not form.instance.has_bulk_sales %}hidden{% endif %}">
+            <label class="block text-sm font-medium text-gray-700">Precio de venta por kilo</label>
+            {{ form.bulk_sale_price }}
+            {% if form.bulk_sale_price.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.bulk_sale_price.errors.0 }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div> -->
+
+
+
+
+
+
+
+
+
+
+
+<!-- 
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const purchasePriceInput = document.getElementById('id_purchase_price');
+    const isPurchaseTaxInput = document.getElementById('id_is_purchase_with_tax');
+    const salePriceInput = document.getElementById('id_sale_price');
+    const isSaleTaxInput = document.getElementById('id_is_sale_with_tax');
+
+    const hasBulkSalesCheckbox = document.getElementById('{{ form.has_bulk_sales.id_for_label }}');
+    const bulkFields = document.querySelectorAll('.bulk-fields');
+
+    const requiresExpirationCheckbox = document.getElementById('id_requires_expiration');
+    const expirationFields = document.getElementById('expiration-fields');
+    
+    function toggleBulkFields() {
+        bulkFields.forEach(field => {
+            field.classList.toggle('hidden', !hasBulkSalesCheckbox.checked);
+        });
+    }
+
+    function toggleExpirationFields() {
+        expirationFields.style.display = requiresExpirationCheckbox.checked ? 'block' : 'none';
+    }
+
+    requiresExpirationCheckbox.addEventListener('change', toggleExpirationFields);
+    toggleExpirationFields();
+    
+    hasBulkSalesCheckbox.addEventListener('change', toggleBulkFields);
+    toggleBulkFields(); // Ejecutar al cargar para establecer estado inicial
+
+    function calculatePrices() {
+        // Obtener valores
+        const purchasePrice = parseFloat(purchasePriceInput.value) || 0;
+        const isPurchaseTax = isPurchaseTaxInput.checked;
+        const salePrice = parseFloat(salePriceInput.value) || 0;
+        const isSaleTax = isSaleTaxInput.checked;
+
+        // Calcular precios netos
+        let netPurchasePrice = isPurchaseTax ? Math.round(purchasePrice / 1.19) : purchasePrice;
+        let netSalePrice = isSaleTax ? Math.round(salePrice / 1.19) : salePrice;
+
+        // Calcular rentabilidad
+        let profitPercentage = 0;
+        if (netPurchasePrice > 0 && netSalePrice > 0) {
+            profitPercentage = Math.round(((netSalePrice - netPurchasePrice) / netPurchasePrice) * 100);
+        }
+
+        // Actualizar UI
+        document.getElementById('netPurchasePrice').textContent = netPurchasePrice.toLocaleString();
+        document.getElementById('netSalePrice').textContent = netSalePrice.toLocaleString();
+        document.getElementById('profitPercentage').textContent = profitPercentage;
+    }
+
+    // Event listeners
+    purchasePriceInput.addEventListener('input', calculatePrices);
+    isPurchaseTaxInput.addEventListener('change', calculatePrices);
+    salePriceInput.addEventListener('input', calculatePrices);
+    isSaleTaxInput.addEventListener('change', calculatePrices);
+
+    // Calcular inicialmente
+    calculatePrices();
+});
+</script>
+{% endblock %} -->

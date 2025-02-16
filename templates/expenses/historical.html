@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Histórico de Gastos - Sistema de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold">Histórico de Gastos</h1>
+        <a href="{% url 'expenses:list' %}" 
+           class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+            <i class="fas fa-arrow-left mr-2"></i>Volver a Gastos
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6">
+        {% for year in years %}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold">{{ year.year }}</h2>
+                <span class="text-2xl font-bold text-gray-700">
+                    $ {{ year.total|intcomma }}
+                </span>
+            </div>
+            
+            <!-- Gráfico de distribución -->
+            <div class="h-64 mb-6">
+                <canvas id="chart-{{ year.year }}" class="w-full h-full"></canvas>
+            </div>
+
+            <!-- Lista de meses -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for month in year.months %}
+                <a href="{% url 'expenses:month_detail' year.year month.number %}"
+                   class="block p-4 rounded-lg hover:bg-gray-50 border border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium">{{ month.name }}</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-gray-600">${{ month.total|intcomma }}</span>
+                            {% if month.is_closed %}
+                                <i class="fas fa-lock text-gray-400 text-sm"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center text-gray-500 py-8">
+            No hay datos históricos disponibles
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    window.yearsData = {{ years|json_script:"years-data" }};
+</script>
+<script src="{% static 'js/expenses/historical.js' %}"></script>
+{% endblock %}
