@@ -12,6 +12,7 @@ class Category(models.Model):
     name = models.CharField(max_length=200, verbose_name="Nombre")
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación")
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de actualización")
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "Categoría"

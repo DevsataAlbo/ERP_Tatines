@@ -39,6 +39,33 @@
         </a>
 
         {% if request.user.role == 'admin' %}
+            <!-- Dropdown de Catálogo -->
+            <div class="relative" x-data="{ open: false }">
+                <button @click="open = !open" class="w-full flex items-center px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'catalog' %}bg-gray-700{% endif %}">
+                    <i class="fas fa-store mr-2"></i>
+                    <span>Catálogo</span>
+                    <i class="fas fa-chevron-down ml-auto" :class="{ 'transform rotate-180': open }"></i>
+                </button>
+                
+                <div x-show="open" class="pl-4">
+                    <a href="{% url 'catalog:list' %}" 
+                    class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.url_name == 'list' %}bg-gray-700{% endif %}">
+                        <i class="fas fa-eye mr-2"></i> Ver Catálogo
+                    </a>
+                    <a href="{% url 'catalog:config' %}" 
+                    class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.url_name == 'config' %}bg-gray-700{% endif %}">
+                        <i class="fas fa-cog mr-2"></i> Configuración
+                    </a>
+                    <!-- Favoritos -->
+                    <a href="{% url 'catalog:favorites' %}" 
+                    class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.url_name == 'favorites' %}bg-gray-700{% endif %}">
+                    <i class="fas fa-heart mr-2"></i> Mis Favoritos
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if request.user.role == 'admin' %}
             <a href="{% url 'suppliers:list' %}" 
             class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'suppliers' %}bg-gray-700{% endif %}">
                 <i class="fas fa-truck mr-2"></i> Proveedores

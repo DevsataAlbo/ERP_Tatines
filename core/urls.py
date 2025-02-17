@@ -32,4 +32,6 @@ urlpatterns = [
    path('suppliers/', include('suppliers.urls')),
    path('inventory/', include('inventory_management.urls')),
    path('customers/', include('customers.urls')),
+#    path('catalog/', include('catalog.urls')),
+   path('catalog/', include('catalog.urls', namespace='catalog')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

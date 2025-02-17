@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load catalog_tags %}
+
+{% block title %}Configuración del Catálogo{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold mb-6">Configuración del Catálogo</h2>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Color del tema</label>
+                    <input 
+                        type="color" 
+                        name="theme_color" 
+                        value="{{ object.theme_color }}"
+                        class="h-10 w-20 p-0 border-0"
+                    >
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Logo</label>
+                    {{ form.logo }}
+                    {% if object.logo %}
+                        <img src="{{ object.logo.url }}" alt="Logo actual" class="mt-2 h-20">
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Activo</label>
+                    {{ form.is_active }}
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <h3 class="text-lg font-semibold mb-4">Opciones de visualización</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for key, option in display_options.items %}
+                    <div class="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            name="display_{{ key }}"
+                            id="display_{{ key }}"
+                            {% if object.display_settings|get_item:key %}checked{% endif %}
+                            class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        >
+                        <label for="display_{{ key }}" class="ml-2 text-sm text-gray-700">
+                            {{ option.label }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <h3 class="text-lg font-semibold mb-4">URL Pública del Catálogo</h3>
+                <div class="flex items-center space-x-2">
+                    <input 
+                        type="text" 
+                        id="catalogUrl"
+                        value="{{ request.scheme }}://{{ request.get_host }}/catalog/p/{{ object.public_url }}/"
+                        class="flex-1 p-2 border rounded"
+                        readonly
+                    >
+                    <button 
+                        type="button" 
+                        onclick="copyUrl()"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                        Copiar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    Guardar cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/catalog/config.js' %}"></script>
+{% endblock %}
