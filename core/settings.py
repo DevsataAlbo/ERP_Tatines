@@ -58,6 +58,7 @@ LOCAL_APPS = [
     'inventory_management',
     'customers',
     'catalog',
+    'tasks',
 ]
 
 THIRD_PARTY_APPS = [

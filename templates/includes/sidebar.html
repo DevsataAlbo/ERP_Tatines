@@ -1,113 +1,223 @@
-<aside class="fixed left-0 top-0 w-64 h-full bg-gray-800 text-white">
-    <div class="p-4">
-        <h2 class="text-2xl font-bold">Ventas</h2>
+<!-- sidebar.html -->
+<aside class="fixed left-0 top-0 w-64 h-full bg-gradient-to-b from-slate-800 to-slate-900 to-emerald-800 text-white shadow-xl">
+    <!-- Logo y título -->
+    <div class="p-4 border-b border-blue-700">
+        <h2 class="text-2xl font-bold text-white flex items-center">
+            <i class="fas fa-store-alt mr-3 text-blue-400"></i>
+            Ventas
+        </h2>
     </div>
     
-    <nav class="mt-4">
-        <a href="{% url 'dashboard:index' %}" class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'dashboard' %}bg-gray-700{% endif %}">
-            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
-        </a>
-
-        <!-- Nueva opción para Reportes Financieros -->
-        {% if request.user.role == 'admin' %}
-            <a href="{% url 'financial_reports:dashboard' %}" 
-            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'financial_reports' %}bg-gray-700{% endif %}">
-                <i class="fas fa-chart-line mr-2"></i> Reportes Financieros
+    <!-- Menú de navegación -->
+    <nav class="mt-4 px-2">
+        <!-- Dashboard -->
+        <div class="mb-4">
+            <a href="{% url 'dashboard:index' %}" 
+               class="block px-4 py-2.5 rounded-lg transition-all duration-200
+                      {% if request.resolver_match.app_name == 'dashboard' %}
+                          bg-blue-700 text-white shadow-lg
+                      {% else %}
+                          hover:bg-blue-700/50 text-gray-100
+                      {% endif %}">
+                <i class="fas fa-chart-line mr-3 text-blue-400"></i>
+                Dashboard
             </a>
+        </div>
+
+        <!-- Separador -->
+        <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Gestión
+        </div>
+
+        <!-- Reportes Financieros -->
+        {% if request.user.role == 'admin' %}
+        <div class="mb-2">
+            <a href="{% url 'financial_reports:dashboard' %}" 
+               class="block px-4 py-2.5 rounded-lg transition-all duration-200
+                      {% if request.resolver_match.app_name == 'financial_reports' %}
+                          bg-blue-700 text-white shadow-lg
+                      {% else %}
+                          hover:bg-blue-700/50 text-gray-100
+                      {% endif %}">
+                <i class="fas fa-file-invoice-dollar mr-3 text-blue-400"></i>
+                Reportes Financieros
+            </a>
+        </div>
         {% endif %}
 
+        <!-- Inventario y Stock -->
         {% if request.user.role == 'admin' %}
+        <div class="space-y-2 mb-2">
             <a href="{% url 'products:stock_entry_list' %}" 
-            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.url_name == 'stock_entry_list' %}bg-gray-700{% endif %}">
-                <i class="fas fa-boxes mr-2"></i>
+               class="block px-4 py-2.5 rounded-lg transition-all duration-200
+                      {% if request.resolver_match.url_name == 'stock_entry_list' %}
+                          bg-blue-700 text-white shadow-lg
+                      {% else %}
+                          hover:bg-blue-700/50 text-gray-100
+                      {% endif %}">
+                <i class="fas fa-boxes mr-3 text-blue-400"></i>
                 Ingresos de Stock
             </a>
-        {% endif %}
-
-        {% if request.user.role == 'admin' %}
+            
             <a href="{% url 'inventory_management:list' %}" 
-            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'inventory_management' %}bg-gray-700{% endif %}">
-                <i class="fas fa-boxes-stacked mr-2"></i>
+               class="block px-4 py-2.5 rounded-lg transition-all duration-200
+                      {% if request.resolver_match.app_name == 'inventory_management' %}
+                          bg-blue-700 text-white shadow-lg
+                      {% else %}
+                          hover:bg-blue-700/50 text-gray-100
+                      {% endif %}">
+                <i class="fas fa-warehouse mr-3 text-blue-400"></i>
                 Inventario
             </a>
-        {% endif %}
-        
-        <!-- {% if request.user.role == 'admin' %}  
-        {% endif %} -->
-        <a href="{% url 'products:list' %}" class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'products' %}bg-gray-700{% endif %}">
-            <i class="fas fa-box mr-2"></i> Productos
-        </a>
-
-        {% if request.user.role == 'admin' %}
-            <!-- Dropdown de Catálogo -->
-            <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open" class="w-full flex items-center px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'catalog' %}bg-gray-700{% endif %}">
-                    <i class="fas fa-store mr-2"></i>
-                    <span>Catálogo</span>
-                    <i class="fas fa-chevron-down ml-auto" :class="{ 'transform rotate-180': open }"></i>
-                </button>
-                
-                <div x-show="open" class="pl-4">
-                    <a href="{% url 'catalog:list' %}" 
-                    class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.url_name == 'list' %}bg-gray-700{% endif %}">
-                        <i class="fas fa-eye mr-2"></i> Ver Catálogo
-                    </a>
-                    <a href="{% url 'catalog:config' %}" 
-                    class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.url_name == 'config' %}bg-gray-700{% endif %}">
-                        <i class="fas fa-cog mr-2"></i> Configuración
-                    </a>
-                    <!-- Favoritos -->
-                    <a href="{% url 'catalog:favorites' %}" 
-                    class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.url_name == 'favorites' %}bg-gray-700{% endif %}">
-                    <i class="fas fa-heart mr-2"></i> Mis Favoritos
-                    </a>
-                </div>
-            </div>
+        </div>
         {% endif %}
 
+        <!-- Catálogo -->
         {% if request.user.role == 'admin' %}
+        <div class="mb-2">
+            <a href="{% url 'catalog:config' %}" 
+            class="block px-4 py-2.5 rounded-lg transition-all duration-200
+                    {% if request.resolver_match.app_name == 'catalog' %}
+                        bg-blue-700 text-white shadow-lg
+                    {% else %}
+                        hover:bg-blue-700/50 text-gray-100
+                    {% endif %}">
+                <i class="fas fa-store mr-3 text-blue-400"></i>
+                Catálogo
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Separador -->
+        <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Operaciones
+        </div>
+
+        <!-- Proveedores y Clientes -->
+        <div class="space-y-2 mb-2">
+            {% if request.user.role == 'admin' %}
             <a href="{% url 'suppliers:list' %}" 
-            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'suppliers' %}bg-gray-700{% endif %}">
-                <i class="fas fa-truck mr-2"></i> Proveedores
+               class="block px-4 py-2.5 rounded-lg transition-all duration-200
+                      {% if request.resolver_match.app_name == 'suppliers' %}
+                          bg-blue-700 text-white shadow-lg
+                      {% else %}
+                          hover:bg-blue-700/50 text-gray-100
+                      {% endif %}">
+                <i class="fas fa-truck mr-3 text-blue-400"></i>
+                Proveedores
             </a>
-        {% endif %}
+            {% endif %}
 
-        {% if request.user.role == 'admin' or request.user.role == 'seller' %}
+            {% if request.user.role == 'admin' or request.user.role == 'seller' %}
             <a href="{% url 'customers:list' %}" 
-            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'customers' %}bg-gray-700{% endif %}">
-                <i class="fas fa-users mr-2"></i> Clientes
+               class="block px-4 py-2.5 rounded-lg transition-all duration-200
+                      {% if request.resolver_match.app_name == 'customers' %}
+                          bg-blue-700 text-white shadow-lg
+                      {% else %}
+                          hover:bg-blue-700/50 text-gray-100
+                      {% endif %}">
+                <i class="fas fa-users mr-3 text-blue-400"></i>
+                Clientes
             </a>
-        {% endif %}
-        
-        {% if request.user.role == 'admin' or request.user.role == 'seller' %}
-            <a href="{% url 'sales:list' %}" class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'sales' %}bg-gray-700{% endif %}">
-                <i class="fas fa-shopping-cart mr-2"></i> Ventas
-            </a>
-        {% endif %}
+            {% endif %}
+        </div>
 
-        {% if request.user.role == 'admin' %}
+        <!-- Ventas y Gastos -->
+        <div class="space-y-2 mb-2">
+            {% if request.user.role == 'admin' or request.user.role == 'seller' %}
+            <a href="{% url 'sales:list' %}" 
+               class="block px-4 py-2.5 rounded-lg transition-all duration-200
+                      {% if request.resolver_match.app_name == 'sales' %}
+                          bg-blue-700 text-white shadow-lg
+                      {% else %}
+                          hover:bg-blue-700/50 text-gray-100
+                      {% endif %}">
+                <i class="fas fa-shopping-cart mr-3 text-blue-400"></i>
+                Ventas
+            </a>
+            {% endif %}
+
+            {% if request.user.role == 'admin' %}
             <a href="{% url 'expenses:list' %}" 
-            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'expenses' %}bg-gray-700{% endif %}">
-                <i class="fas fa-file-invoice-dollar mr-2"></i> Gastos
+               class="block px-4 py-2.5 rounded-lg transition-all duration-200
+                      {% if request.resolver_match.app_name == 'expenses' %}
+                          bg-blue-700 text-white shadow-lg
+                      {% else %}
+                          hover:bg-blue-700/50 text-gray-100
+                      {% endif %}">
+                <i class="fas fa-file-invoice mr-3 text-blue-400"></i>
+                Gastos
             </a>
+            {% endif %}
+        </div>
+
+        <!-- Tareas -->
+        {% if request.user.role == 'admin' or request.user.role == 'seller' %}
+        <div class="mb-2" x-data="{ open: {% if request.resolver_match.app_name == 'tasks' %}true{% else %}false{% endif %} }">
+            <button @click="open = !open" 
+                    class="w-full px-4 py-2.5 rounded-lg transition-all duration-200 
+                           flex items-center justify-between
+                           {% if request.resolver_match.app_name == 'tasks' %}
+                               bg-blue-700 text-white shadow-lg
+                           {% else %}
+                               hover:bg-blue-700/50 text-gray-100
+                           {% endif %}">
+                <span class="flex items-center">
+                    <i class="fas fa-tasks mr-3 text-blue-400"></i>
+                    Tareas
+                </span>
+                <i class="fas fa-chevron-right text-sm transition-transform duration-200"
+                   :class="{'rotate-90': open}"></i>
+            </button>
+            
+            <div x-show="open" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 transform -translate-y-2"
+                 x-transition:enter-end="opacity-100 transform translate-y-0"
+                 class="pl-4 mt-2 space-y-2">
+                <a href="{% url 'tasks:task_list' %}" 
+                   class="block px-4 py-2 rounded-lg transition-all duration-200
+                          {% if request.resolver_match.url_name == 'task_list' %}
+                              bg-blue-700 text-white shadow-lg
+                          {% else %}
+                              hover:bg-blue-700/50 text-gray-100
+                          {% endif %}">
+                    <i class="fas fa-list mr-2 text-blue-400"></i>
+                    Vista Lista
+                </a>
+                <a href="{% url 'tasks:calendar' %}" 
+                   class="block px-4 py-2 rounded-lg transition-all duration-200
+                          {% if request.resolver_match.url_name == 'calendar' %}
+                              bg-blue-700 text-white shadow-lg
+                          {% else %}
+                              hover:bg-blue-700/50 text-gray-100
+                          {% endif %}">
+                    <i class="fas fa-calendar mr-2 text-blue-400"></i>
+                    Vista Calendario
+                </a>
+            </div>
+        </div>
         {% endif %}
 
-        {% if request.user.role == 'admin' %}
-        <a href="{% url 'payment_providers:list' %}" 
-            class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'payment_providers' %}bg-gray-700{% endif %}"> <i class="fa-solid fa-basket-shopping"></i> Medios de Pago
-        </a>
-        {% endif %}
+        <!-- Separador -->
+        <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Configuración
+        </div>
 
+        <!-- Usuarios -->
         {% if request.user.role == 'admin' %}
-        <a href="{% url 'products:expiring' %}" class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.url_name == 'expiring' %}bg-gray-700{% endif %}">
-            <i class="fas fa-clock-rotate-left mr-2"></i>
-            Productos por Vencer
-        </a>
-        {% endif %}
-        
-        {% if request.user.role == 'admin' %}
-        <a href="{% url 'users:list' %}" class="block px-4 py-2 hover:bg-gray-700 {% if request.resolver_match.app_name == 'users' %}bg-gray-700{% endif %}"> <i class="fas fa-users mr-2"></i>  Usuarios
-        </a>
+        <div class="mb-2">
+            <a href="{% url 'users:list' %}" 
+               class="block px-4 py-2.5 rounded-lg transition-all duration-200
+                      {% if request.resolver_match.app_name == 'users' %}
+                          bg-blue-700 text-white shadow-lg
+                      {% else %}
+                          hover:bg-blue-700/50 text-gray-100
+                      {% endif %}">
+                <i class="fas fa-user-cog mr-3 text-blue-400"></i>
+                Usuarios
+            </a>
+        </div>
         {% endif %}
     </nav>
 </aside>

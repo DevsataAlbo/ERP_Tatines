@@ -10,6 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Extra CSS -->
     {% block extra_css %}{% endblock extra_css %}
+    {% block extra_head %}
+    {{ block.super }}
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css' rel='stylesheet' />
+    {% block additional_head %}{% endblock %}
+{% endblock %}
 </head>
 <body class="bg-gray-100">
     {% block sidebar %}
@@ -40,8 +46,19 @@
     </div>
 
     <!-- JavaScript -->
-    {% block javascript %}{% endblock javascript %}
+    {% block javascript %}
+        <!-- Alpine.js -->
+        <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <!-- FullCalendar JS -->
+        <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.js'></script>
+        <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.js'></script>
+        <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.10/main.min.js'></script>
+        <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/main.min.js'></script>
+        {% block additional_javascript %}{% endblock %}
+    {% endblock %}
     <!-- Extra JavaScript -->
     {% block extra_js %}{% endblock extra_js %}
 </body>
 </html>
+
+

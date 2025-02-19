@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Calendario de Tareas | Gestión de Ventas{% endblock %}
+
+{% block extra_head %}
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet'>
+
+<style>
+    .fc-event {
+        cursor: pointer;
+    }
+    .priority-high {
+        background-color: #EF4444;
+        border-color: #DC2626;
+    }
+    .priority-medium {
+        background-color: #F59E0B;
+        border-color: #D97706;
+    }
+    .priority-low {
+        background-color: #22C55E;
+        border-color: #16A34A;
+    }
+    .task-completed {
+        opacity: 0.7;
+        text-decoration: line-through;
+    }
+
+    /* Estilos para el panel lateral */
+    #selectedDayTasks {
+        max-height: calc(100vh - 300px);
+        overflow-y: auto;
+    }
+    
+    .task-item {
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .task-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <!-- Header con botones de navegación -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center space-x-4">
+            <h1 class="text-2xl font-bold">Calendario de Tareas</h1>
+            <div class="flex space-x-2">
+                <button id="prevButton" class="px-3 py-1 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button id="nextButton" class="px-3 py-1 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button id="todayButton" class="px-4 py-1 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    Hoy
+                </button>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <!-- Vista de calendario -->
+            <div class="flex rounded-lg bg-gray-100 p-1">
+                <button id="monthView" class="px-4 py-1 rounded-lg bg-white shadow">Mes</button>
+                <button id="weekView" class="px-4 py-1 rounded-lg hover:bg-white">Semana</button>
+            </div>
+            <!-- Botón para alternar entre vista calendario y lista -->
+            <a href="{% url 'tasks:task_list' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <i class="fas fa-list mr-2"></i>
+                Vista Lista
+            </a>
+            <button onclick="openNewTaskModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <i class="fas fa-plus mr-2"></i>
+                Nueva Tarea
+            </button>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="grid grid-cols-12 gap-6">
+        <!-- Calendario -->
+        <div class="col-span-9">
+            <div class="bg-white rounded-lg shadow p-4">
+                <div id="calendar"></div>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-span-3">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-lg font-medium mb-4">Tareas del día</h3>
+                <div id="selectedDayTasks" class="space-y-3">
+                    <!-- Las tareas se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para nueva/editar tarea -->
+{% include "tasks/task_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<!-- FullCalendar Bundle -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+<!-- Custom JS -->
+<script src="{% static 'js/tasks/task_management.js' %}"></script>
+<script src="{% static 'js/tasks/calendar_view.js' %}"></script>
+{% endblock %}

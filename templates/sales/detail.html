@@ -5,11 +5,10 @@
 {% block title %}Venta {{ sale.number }} - Sistema de Ventas{% endblock %}
 
 {% block content %}
-
-<div class="container mx-auto px-4 py-6">
-    <div class="max-w-4xl mx-auto">
+<div class="w-full max-w-7xl mx-auto">
+    <div class="space-y-6">
         <!-- Encabezado -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex justify-between items-center">
                 <h1 class="text-2xl font-semibold">Venta #{{ sale.number }}</h1>
                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -25,7 +24,7 @@
             </div>
 
             <!-- Detalles de la venta -->
-            <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                     <span class="text-gray-500">Fecha:</span>
                     <span class="ml-2">{{ sale.date|date:"d/m/Y H:i" }}</span>
@@ -35,12 +34,12 @@
                 {% if sale.customer %}
                 <div class="mt-4 border-t pt-4">
                     <h3 class="text-lg font-medium mb-2">Información del Cliente</h3>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <p class="text-sm">
                                 <span class="text-gray-500">Cliente:</span>
                                 <a href="{% url 'customers:detail' sale.customer.pk %}" 
-                                class="text-blue-600 hover:text-blue-900 ml-1">
+                                   class="text-blue-600 hover:text-blue-900 ml-1 hover:underline">
                                     {{ sale.customer.get_full_name }}
                                 </a>
                             </p>
@@ -70,100 +69,11 @@
                     </div>
                 </div>
                 {% endif %}
-
-                <!-- <div>
-                    <span class="text-gray-500">Método de Pago:</span>
-                    <span class="ml-2">{{ sale.get_payment_method_display }}</span>
-                </div> -->
-
-                <!-- {% if sale.payment_method == 'CREDIT' and sale.installments %}
-                <div>
-                    <span class="text-gray-500">Cuotas:</span>
-                    <span class="ml-2">{{ sale.installments }}</span>
-                </div>
-                {% endif %}
-
-                {% if sale.payment_provider %}
-                <div>
-                    <span class="text-gray-500">Plataforma de pago:</span>
-                    <span class="ml-2">{{ sale.payment_provider.name }}</span>
-                </div>
-                {% endif %}
-
-                {% if sale.commission_amount > 0 %}
-                <div>
-                    <span class="text-gray-500">Comisión:</span>
-                    <span class="ml-2">$ {{ sale.commission_amount|intcomma }}</span>
-                </div>
-                
-                {% if sale.commission_tax > 0 %}
-                <div>
-                    <span class="text-gray-500">IVA Comisión:</span>
-                    <span class="ml-2">$ {{ sale.commission_tax|intcomma }}</span>
-                </div>
-                {% endif %} -->
-                <!-- {% endif %} -->
             </div>
         </div>
 
         <!-- Detalle de Productos -->
-        <!-- <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-lg font-medium">Productos</h2>
-            </div>
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Producto
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Cantidad
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Precio Unit.
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Subtotal
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Ganancia
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for detail in sale.saledetail_set.all %}
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {{ detail.product.name }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ detail.quantity }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            $ {{ detail.unit_price|intcomma }}
-                            {% if detail.is_tax_included %}
-                                <span class="text-xs text-gray-400">(IVA inc.)</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            $ {{ detail.subtotal|intcomma }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            $ {{ detail.calculate_profit|intcomma }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot class="bg-gray-50">
-                    <tr>
-                        
-                    </tr>
-                </tfoot>
-            </table>
-        </div> -->
-
-        <div class="mt-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
             <h4 class="text-lg font-medium mb-4">Detalle de Productos</h4>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -204,33 +114,13 @@
                 </table>
             </div>
         </div>
-        <!-- {% if sale.payment_method in 'DEBIT,CREDIT' %}
-        <div class="mt-4 border-t pt-4">
-            <h3 class="font-medium text-gray-700 mb-2">Detalle de Comisiones</h3>
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <span class="text-gray-500">Comisión base:</span>
-                    <span class="ml-2">$ {{ sale.commission_amount|intcomma }}</span>
-                </div>
-                <div>
-                    <span class="text-gray-500">IVA comisión:</span>
-                    <span class="ml-2">$ {{ sale.commission_tax|intcomma }}</span>
-                </div>
-                <div class="col-span-2 pt-2 border-t mt-2">
-                    <span class="text-gray-500 font-medium">Total comisión:</span>
-                    <span class="ml-2 font-medium">$ {{ sale.get_total_commission|intcomma }}</span>
-                    <span class="text-sm text-gray-500 ml-2">({{ sale.get_commission_percentage }}%)</span>
-                </div>
-            </div>
-        </div>
-        {% endif %} -->
 
         <!-- Sección de resumen financiero -->
-        <div class="mt-6 p-4 bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
             <h3 class="text-lg font-medium text-gray-900 mb-4">Resumen Financiero</h3>
     
             <!-- Desglose de Venta -->
-            <div class="grid grid-cols-2 gap-2 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
                     <span class="text-gray-500">Venta Neta:</span>
                     <span class="ml-2 font-medium">$ {{ sale.get_neto_venta|intcomma }}</span>
@@ -247,9 +137,9 @@
 
             <!-- Detalle de Comisiones -->
             {% if sale.payment_method in 'DEBIT,CREDIT' %}
-            <div class="border-t border-gray-200 pt-4 mb-4">
-                <h4 class="font-medium text-gray-700 mb-2">Detalle de Comisiones</h4>
-                <div class="grid grid-cols-2 gap-2">
+            <div class="border-t border-gray-200 pt-4 mb-6">
+                <h4 class="font-medium text-gray-700 mb-4">Detalle de Comisiones</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <span class="text-gray-500">Comisión base:</span>
                         <span class="ml-2">$ {{ sale.commission_amount|intcomma }}</span>
@@ -259,7 +149,7 @@
                         <span class="text-gray-500">IVA comisión:</span>
                         <span class="ml-2">$ {{ sale.commission_tax|intcomma }}</span>
                     </div>
-                    <div class="col-span-2 pt-2 border-t mt-2">
+                    <div class="col-span-2 pt-2 border-t">
                         <span class="text-gray-500 font-medium">Total comisión:</span>
                         <span class="ml-2 font-medium">$ {{ sale.get_total_commission|intcomma }}</span>
                     </div>
@@ -269,7 +159,7 @@
 
             <!-- Rentabilidad -->
             <div class="border-t border-gray-200 pt-4">
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <span class="text-gray-500">Ganancia Bruta:</span>
                         <span class="ml-2 font-medium">$ {{ sale.calculate_profit|intcomma }}</span>
@@ -278,82 +168,50 @@
                         <span class="text-gray-500">Total Comisión:</span>
                         <span class="ml-2 font-medium">$ {{ sale.get_total_commission|intcomma }}</span>
                     </div>
-                    <div class="col-span-2 pt-2 border-t mt-2">
+                    <div class="col-span-2 pt-2 border-t">
                         <span class="text-gray-700 font-medium">Rentabilidad Neta:</span>
                         <span class="text-xl font-bold ml-2">$ {{ sale.calculate_net_profit|intcomma }}</span>
                     </div>
                 </div>
             </div>
-
-            <!-- Detalle de pago -->
-            <!-- <div class="border-t border-gray-200 pt-4 mb-4">
-                <h4 class="font-medium text-gray-700 mb-2">Detalle de Pago</h4>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <span class="text-gray-500">Método:</span>
-                        <span class="ml-2">{{ sale.get_payment_method_display }}</span>
-                    </div>
-                    <div>
-                        <span class="text-gray-500">Proveedor:</span>
-                        <span class="ml-2">{{ sale.payment_provider.name }}</span>
-                    </div>
-                    {% if sale.installments %}
-                    <div>
-                        <span class="text-gray-500">Cuotas Cliente:</span>
-                        <span class="ml-2">{{ sale.installments }}</span>
-                    </div>
-                    <div>
-                        <span class="text-gray-500">Cuotas a Recibir:</span>
-                        <span class="ml-2">{{ sale.provider_installments }}</span>
-                    </div>
-                    {% endif %}
-                </div>
-            </div> -->
-
-            <!-- Rentabilidad Final -->
-            <!-- <div class="border-t border-gray-200 pt-4">
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-700 font-medium">Rentabilidad Neta:</span>
-                    <span class="text-xl font-bold">$ {{ sale.calculate_net_profit|intcomma }}</span>
-                </div>
-            </div> -->
         </div>
 
         <!-- Botones de Acción -->
-        <div class="flex justify-between items-center">
-            <a href="{% url 'sales:list' %}" 
-            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
-                Volver a la lista
-            </a>
-            
-            <div class="flex gap-2">  <!-- Agregamos flex y gap-2 aquí -->
-                {% if sale.status == 'PENDING' %}
-                    <form method="post" action="{% url 'sales:update_status' sale.pk %}" class="inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="status" value="COMPLETED">
-                        <button type="submit" 
-                                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
-                            Marcar como Completada
-                        </button>
-                    </form>
-                {% endif %}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <a href="{% url 'sales:list' %}" 
+                   class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors duration-200 text-center">
+                    Volver a la lista
+                </a>
+                
+                <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                    {% if sale.status == 'PENDING' %}
+                        <form method="post" action="{% url 'sales:update_status' sale.pk %}" class="w-full md:w-auto">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="COMPLETED">
+                            <button type="submit" 
+                                    class="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-200">
+                                Marcar como Completada
+                            </button>
+                        </form>
+                    {% endif %}
 
-                {% if sale.status == 'PENDING' or sale.status == 'COMPLETED' %}
-                    <a href="{% url 'sales:cancel_confirmation' sale.pk %}" 
-                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
-                        Anular Venta
-                    </a>
-                {% endif %}
+                    {% if sale.status == 'PENDING' or sale.status == 'COMPLETED' %}
+                        <a href="{% url 'sales:cancel_confirmation' sale.pk %}" 
+                           class="w-full md:w-auto bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-200 text-center">
+                            Anular Venta
+                        </a>
+                    {% endif %}
 
-                {% if sale.status != 'CANCELLED' %}
-                    <a href="{% url 'sales:edit' sale.pk %}" 
-                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
-                        Editar Venta
-                    </a>
-                {% endif %}
+                    {% if sale.status != 'CANCELLED' %}
+                        <a href="{% url 'sales:edit' sale.pk %}" 
+                           class="w-full md:w-auto bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg transition-colors duration-200 text-center">
+                            Editar Venta
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
-

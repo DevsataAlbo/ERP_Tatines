@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tareas | Gestión de Ventas{% endblock %}
+
+{% block header_title %}Tareas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Mis Tareas</h1>
+        <div class="flex space-x-4">
+            <!-- Botón para vista calendario -->
+            <a href="{% url 'tasks:calendar' %}" 
+               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+                <i class="fas fa-calendar mr-2"></i>
+                Vista Calendario
+            </a>
+            <button onclick="openNewTaskModal()" 
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+                <i class="fas fa-plus mr-2"></i>
+                Nueva Tarea
+            </button>
+        </div>
+    </div>
+
+    <!-- Panel de filtros -->
+    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Búsqueda -->
+            <div class="relative">
+                <input type="text" 
+                       id="searchInput"
+                       placeholder="Buscar tareas..." 
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+            </div>
+
+            <!-- Filtro de estado -->
+            <select id="statusFilter" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Todos los estados</option>
+                <option value="pending">Pendientes</option>
+                <option value="completed">Completadas</option>
+            </select>
+
+            <!-- Filtro de prioridad -->
+            <select id="priorityFilter" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Todas las prioridades</option>
+                <option value="high">Alta</option>
+                <option value="medium">Media</option>
+                <option value="low">Baja</option>
+            </select>
+
+            <!-- Ordenamiento -->
+            <select id="sortOrder" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="created_desc">Más recientes primero</option>
+                <option value="created_asc">Más antiguas primero</option>
+                <option value="due_date_asc">Fecha límite ↑</option>
+                <option value="due_date_desc">Fecha límite ↓</option>
+                <option value="priority_desc">Prioridad ↓</option>
+                <option value="priority_asc">Prioridad ↑</option>
+            </select>
+        </div>
+
+        <!-- Filtro de fechas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div class="flex items-center space-x-2">
+                <label class="text-sm text-gray-600">Desde:</label>
+                <input type="date" 
+                       id="dateFrom" 
+                       class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="flex items-center space-x-2">
+                <label class="text-sm text-gray-600">Hasta:</label>
+                <input type="date" 
+                       id="dateTo" 
+                       class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de tareas -->
+    <div class="grid grid-cols-1 gap-4" id="taskList">
+        {% for task in tasks %}
+        <div class="task-item bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow border-l-4 cursor-move"
+             data-task-id="{{ task.id }}"
+             data-priority="{{ task.priority }}"
+             data-status="{{ task.status }}"
+             data-created="{{ task.created_at|date:'Y-m-d' }}"
+             data-due-date="{{ task.due_date|date:'Y-m-d' }}"
+             style="border-left-color: {% if task.priority == 'high' %}#EF4444{% elif task.priority == 'medium' %}#F59E0B{% else %}#22C55E{% endif %}">
+            <div class="flex justify-between items-start">
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleTaskStatus('{{ task.id }}')" 
+                            class="text-gray-400 hover:text-green-500 transition-colors">
+                        <i class="fas fa-check-circle {% if task.status == 'completed' %}text-green-500{% endif %}"></i>
+                    </button>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-lg font-medium {% if task.status == 'completed' %}line-through text-gray-500{% endif %}">
+                                {{ task.title }}
+                            </h3>
+                            <span class="text-xs px-2 py-1 rounded-full 
+                                {% if task.priority == 'high' %}
+                                    bg-red-100 text-red-800
+                                {% elif task.priority == 'medium' %}
+                                    bg-yellow-100 text-yellow-800
+                                {% else %}
+                                    bg-green-100 text-green-800
+                                {% endif %}">
+                                {{ task.get_priority_display }}
+                            </span>
+                        </div>
+                        {% if task.description %}
+                        <p class="text-gray-600 mt-1">{{ task.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    {% if task.due_date %}
+                    <span class="text-sm px-2 py-1 rounded bg-gray-100 text-gray-600">
+                        <i class="far fa-calendar mr-1"></i>
+                        {{ task.due_date|date:"d M Y" }}
+                    </span>
+                    {% endif %}
+                    <div class="flex items-center">
+                        <button onclick="openEditTaskModal('{{ task.id }}')" 
+                                class="text-gray-400 hover:text-blue-500 px-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteTask('{{ task.id }}')" 
+                                class="text-gray-400 hover:text-red-500 px-2">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-12 bg-white rounded-lg shadow">
+            <div class="text-gray-400 mb-4">
+                <i class="fas fa-tasks text-6xl"></i>
+            </div>
+            <h3 class="text-xl font-medium text-gray-600 mb-2">No hay tareas que coincidan con los filtros</h3>
+            <p class="text-gray-500 mb-4">Intenta ajustar los criterios de búsqueda o crear una nueva tarea</p>
+            <button onclick="openNewTaskModal()" 
+                    class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                <i class="fas fa-plus mr-2"></i>
+                Crear Tarea
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% include "tasks/task_modal.html" %}
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="{% static 'js/tasks/task_management.js' %}"></script>
+<script src="{% static 'js/tasks/task_filters.js' %}"></script>
+{% endblock %}
